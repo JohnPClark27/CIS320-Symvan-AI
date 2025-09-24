@@ -1,1 +1,2 @@
 # CIS320-Symvan-AI
+    For the students and faculty of Indiana Wesleyan University, Symvan AI aims to be an event planner website that allows students to be better informed about events on campus. Rather than using a variety of different sources to gather information about campus events, our product aims to be a unified source for all campus events. 
