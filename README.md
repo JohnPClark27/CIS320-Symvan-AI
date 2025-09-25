@@ -18,5 +18,3 @@ Rather than using a variety of different sources to gather information about cam
 - Backend: Python
 - Database: mySQL
 - AI: Few shot method used to help enhance user experience
-
-# Setup
