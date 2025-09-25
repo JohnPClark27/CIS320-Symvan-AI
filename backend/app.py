@@ -4,6 +4,17 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
+import pymysql
+conn = pymysql.connect(
+    host="localhost",
+    user="symvan_user",
+    password="password",
+    database="symvan_db",
+    port=3306
+)
+print("Connected!", conn)
+
+
 app = Flask(__name__)
 
 load_dotenv()
