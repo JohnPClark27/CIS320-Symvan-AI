@@ -20,3 +20,13 @@ Rather than using a variety of different sources to gather information about cam
 - AI: Few shot method used to help enhance user experience
 
 # Setup
+
+# Contribution Guidelines
+Feel free to contribute any bug reports, requests, or improvements!
+
+- Please follow coding style shown in current files
+- Write clean documentation
+- Run various tests before making request
+- Show clear commit convention to show what you have added
+
+Contributions are apprecieted and will be reviewed by our team.
