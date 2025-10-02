@@ -20,6 +20,7 @@ Rather than using a variety of different sources to gather information about cam
 - AI: Few shot method used to help enhance user experience
 
 # Setup
+Please follow the steps defined in the /SETUP.md file.
 
 # Contribution Guidelines
 Feel free to contribute any bug reports, requests, or improvements!
