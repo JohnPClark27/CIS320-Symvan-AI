@@ -1,4 +1,5 @@
-from app import app, db, User
+from app import app, db
+from model import User
 
 with app.app_context():
 
