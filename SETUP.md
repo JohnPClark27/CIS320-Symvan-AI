@@ -20,7 +20,8 @@
 
 ## 3. Backend Setup
 - cd backend
-- python -m venv venv
+- python -m venv venv (Create virtual enivronment)
+- venv\Scripts\activate (Activate virtual environment)
 - pip install -r requirements.txt
 - python app.py
 - Visitng http://localhost:5000/health should offer a basic health check.
