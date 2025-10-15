@@ -10,13 +10,20 @@
 - Download: https://www.apachefriends.org/download.html
 - Start Apache and MySQL services from XAMPP Control Panel
 - Access phpMyAdmin at http://localhost/phpmyadmin
+- Go to Databases->Create database
+- Enter "symvan_db"->Create
+- Go to User Accounts->Add user account
+- User name: "symvan_admin"
+- Host name: "localhost"
+- Password: (your unique password)
+- Under "Global privileges" click "Check all"
 
 **GIT**
 - git --version
 
 ## 2. Environment Variables
 - Copy .env.example into .env
-- Update values based on your machine
+- Update values based on your machine (change "your_password" to your unique password)
 
 ## 3. Backend Setup
 - cd backend
