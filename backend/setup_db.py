@@ -1,6 +1,7 @@
 from app import app, db
 from models import User, Organization, Event, Member
-from seed import seed_users, seed_organizations, seed_events, create_membership
+import services as s
+from datetime import datetime, time
 
 with app.app_context():
     print("Dropping existing tables...")
@@ -10,20 +11,18 @@ with app.app_context():
     db.create_all()
 
     print("Seeding initial data...")
-    users = seed_users()
-    organizations = seed_organizations()
-
-    db.session.add_all(users+organizations)
-    db.session.commit()
-
-    user = User.query.filter_by(username="JohnDoe").first()
-    org = Organization.query.filter_by(name="Computer Science Club").first()
-    events = seed_events(org.id)
-    memberships = create_membership(user.id, org.id)
-
-    db.session.add_all(events+memberships)
-    db.session.commit()
+    user = s.create_user("JohnDoe", "NA")
+    org = s.create_organization("Computer Science Club", "A club for students to build connections and learn more about special concepts in computer science.")
+    event = s.create_event("Coding Meeting", org.id, location="Ott Rm 121")
+    s.add_member(user.id, org.id)
 
     print("Database Seeded")
+
+    print(s.post_event(event.id))
+
+    s.update(event, details = "Weekly coding meeting.", date = datetime(2024,11,1), start_time = time(18,0), end_time = time(19,0))
+
+    print(s.post_event(event.id))
+
 
     
