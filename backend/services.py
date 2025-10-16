@@ -6,28 +6,28 @@
 from models import db, User, Event, Organization, Event, Member
 
 # Create functions
-def create_user(username, password_hash, email=None):
-    user = User(username = username, password_hash = password_hash, email = email)
+def create_user(username,level, password_hash, email=None):
+    user = User(username = username, level = level, password_hash = password_hash, email = email)
     db.session.add(user)
-    db.session.commit()
+    db.session.flush()
     return user
 
 def create_organization(name, description=None):
     org = Organization(name = name, description = description)
     db.session.add(org)
-    db.session.commit()
+    db.session.flush()
     return org
 
 def create_event(name, organization_id, details=None, date=None, start_time=None, end_time=None, location=None):
     event = Event(name = name, organization_id = organization_id, details = details, date = date, start_time = start_time, end_time = end_time, location = location, status = "Draft")
     db.session.add(event)
-    db.session.commit()
+    db.session.flush()
     return event
 
 def add_member(user_id, organization_id, permission_level="Member"):
     member = Member(user_id = user_id, organization_id = organization_id, permission_level = permission_level)
     db.session.add(member)
-    db.session.commit()
+    db.session.flush()
     return member
 
 def remove_member(user_id, organization_id):
@@ -35,7 +35,7 @@ def remove_member(user_id, organization_id):
     if not member:
         return "Member not found"
     db.session.delete(member)
-    db.session.commit()
+    db.session.flush()
     return "Member removed"
 
 # Read functions
@@ -95,13 +95,13 @@ def get_all_events():
 
 # Update functions
 def update(obj, **kwargs):
+    
     if not obj:
         return None
     for key, value in kwargs.items():
         if hasattr(obj , key):
             setattr(obj,key, value)
-    db.session.commit()
-    return obj
+    return obj.id
 
 # This is for when we are ready to post an event.
 def post_event(event_id):
@@ -120,7 +120,7 @@ def post_event(event_id):
         return f"Missing fields: {', '.join(missing_fields)}"
         
     event.status = "Posted"
-    db.session.commit()
+    db.session.flush()
     return "Event posted successfully"
 
 # Remove functions
@@ -130,7 +130,7 @@ def remove_user(user_id):
         return "User not found"
     username = user.username
     db.session.delete(user)
-    db.session.commit()
+    db.session.flush()
     return f"User {username} removed"
 
 def remove_organization(org_id):
@@ -139,7 +139,7 @@ def remove_organization(org_id):
         return "Organization not found"
     name = org.name
     db.session.delete(org)
-    db.session.commit()
+    db.session.flush()
     return f"Organization {name} removed"
 
 def remove_event(event_id):
@@ -148,5 +148,5 @@ def remove_event(event_id):
         return "Event not found"
     name = event.name
     db.session.delete(event)
-    db.session.commit()
+    db.session.flush()
     return f"Event {name} removed"
