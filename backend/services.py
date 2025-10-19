@@ -2,33 +2,73 @@
 # Provides service function to manage database operations
 # Version: 1.0
 # Date: 2025-10-15
-
-from models import db, User, Event, Organization, Event, Member
+from extensions import db
+from models import  User, Event, Organization, Member
+import bcrypt
+from extensions import *
+ 
+# Permission check
+def has_permission(actor, required_level):
+    if not actor:
+        return False
+    map = {"User": 1, "Moderator": 3, "Admin": 5}
+    return map.get(actor.level, 0) >= required_level
 
 # Create functions
-def create_user(username,level, password_hash, email=None):
-    user = User(username = username, level = level, password_hash = password_hash, email = email)
+def create_user(actor, username,level, password, email=None):
+    if has_permission(actor, 5) == False:
+        return "Permission denied"
+    
+    existing_user = get_user_by_username(username)
+    if existing_user:
+        return "Username already exists"
+    
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    
+    user = User(username = username, level = level, password_hash = password_hash, email = email, modified_by = actor.id)
     db.session.add(user)
     db.session.flush()
+
     return user
 
-def create_organization(name, description=None):
-    org = Organization(name = name, description = description)
+def create_organization(actor, name, description=None):
+    if has_permission(actor, 3) == False:
+        return "Permission denied"
+    
+    existing_org = get_organization_by_name(name)
+    if existing_org:
+        return "Organization name already exists"
+    
+    org = Organization(name = name, description = description, modified_by = actor.id)
     db.session.add(org)
     db.session.flush()
     return org
 
-def create_event(name, organization_id, details=None, date=None, start_time=None, end_time=None, location=None):
-    event = Event(name = name, organization_id = organization_id, details = details, date = date, start_time = start_time, end_time = end_time, location = location, status = "Draft")
-    db.session.add(event)
-    db.session.flush()
-    return event
+def create_event(actor, name, organization_id, details=None, date=None, start_time=None, end_time=None, location=None):
+    permissions = get_member_permissions(actor.id, organization_id)
 
-def add_member(user_id, organization_id, permission_level="Member"):
-    member = Member(user_id = user_id, organization_id = organization_id, permission_level = permission_level)
-    db.session.add(member)
-    db.session.flush()
-    return member
+    if permissions == "Member":
+        return "Invalid Permissions"
+
+    event = get_event_by_name(name)
+    if not event:
+        event = Event(name = name, organization_id = organization_id, details = details, date = date, start_time = start_time, end_time = end_time, location = location, status = "Draft", modified_by = actor.id)
+        db.session.add(event)
+        db.session.flush()
+        return event
+    return "Event name already exists"
+
+def add_member(actor, user_id, organization_id, permission_level="Member"):
+    if has_permission(actor, 3) == False:
+        return "Permission denied"
+    
+    member = Member.query.filter_by(user_id=user_id, organization_id=organization_id).first()
+    if not member:
+        member = Member(user_id = user_id, organization_id = organization_id, permission_level = permission_level, modified_by = actor.id)
+        db.session.add(member)
+        db.session.flush()
+        return member
+    return "User is already a member of this organization"
 
 def remove_member(user_id, organization_id):
     member = Member.query.filter_by(user_id=user_id, organization_id=organization_id).first()
@@ -78,7 +118,7 @@ def get_org_posted_events(org_id):
 def get_org_draft_events(org_id):
     return Event.query.filter_by(organization_id=org_id, status="Draft").all()
 
-def get_user_permission(user_id, org_id):
+def get_member_permissions(user_id, org_id):
     member = Member.query.filter_by(user_id=user_id, organization_id=org_id).first()
     if member:
         return member.permission_level
@@ -93,6 +133,16 @@ def get_all_organizations():
 def get_all_events():
     return Event.query.all()
 
+def get_user_level(user_id):
+    user = get_user(user_id)
+    if user:
+        if user.level == "Admin":
+            return 5
+        elif user.level == "Moderator":
+            return 3
+        elif user.level == "User":
+            return 1
+
 # Update functions
 def update(obj, **kwargs):
     
@@ -101,6 +151,7 @@ def update(obj, **kwargs):
     for key, value in kwargs.items():
         if hasattr(obj , key):
             setattr(obj,key, value)
+    db.session.flush()
     return obj.id
 
 # This is for when we are ready to post an event.
@@ -150,3 +201,23 @@ def remove_event(event_id):
     db.session.delete(event)
     db.session.flush()
     return f"Event {name} removed"
+
+# User Functions
+def verify_password(username, password):
+    debug_print(f"Attempting to verify password for: {username}")
+    user = get_user_by_username(username)
+    if not user:
+        return False
+    debug_print(f"Verifying password for user: {username}")
+    return bcrypt.checkpw(password.encode("utf-8"), user.password_hash)
+
+def change_password(actor_id, username, new_password):
+    debug_print(f"Changing password for: {username}")
+    user = get_user_by_username(username)
+    if not user:
+        debug_print(f"User {username} not found")
+        return False
+    user.password_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
+    db.session.flush()
+    debug_print(f"Password changed for: {username}")
+    return True

@@ -1,33 +1,75 @@
-from app import app, db
-from models import User, Organization, Event, Member
+from app import app
+
 from services import *
 from datetime import date, time
+from extensions import *
+import sys
+import os
 
-with app.app_context():
-    print("Dropping existing tables...")
-    db.drop_all()
-
-    print("Creating tables...")
-    db.create_all()
-
-    print("Seeding initial data...")
+def setup():
     
-    user = create_user("JohnDoe","User", "NA")
-    org = create_organization("Computer Science Club", "A club for students to build connections and learn more about special concepts in computer science.")
+    with app.app_context():
+        inspector = db.inspect(db.engine)
+        tables = inspector.get_table_names()
 
-    event = create_event("Coding Meeting", org.id, location="Ott Rm 121")
-    add_member(user.id, org.id, permission_level="Admin")
+        if not tables:
+            db.drop_all()
 
-    user2 = create_user("JaneSmith","User", "NA")
-    add_member(user2.id, org.id, permission_level="Member")
+            db.create_all()
+            print("Database tables created.")
 
-    db.session.commit()
-    print("Database Seeded")
+        print("Seeding initial data...")
+
+        admin_username = os.environ.get("ADMIN_USERNAME")
+        admin_password = os.environ.get("ADMIN_PASSWORD")
+        system_password = os.environ.get("SYSTEM_PASSWORD")
+
+        if not admin_username or not admin_password or not system_password:
+            print("Admin credentials missing in environment variables.")
+            return
     
-    print(post_event(event.id))
+        existing_admin = User.query.filter_by(username = admin_username).first()
+        existing_system = User.query.filter_by(username = "System").first()
+        
+        if existing_system:
+            print("System user already exist.")
+        else:
+            system = User(level = "Admin", username = "System", password_hash = bcrypt.hashpw(system_password.encode("utf-8"), bcrypt.gensalt()), modified_by = None)
+            db.session.add(system)
+            db.session.flush()
 
-    update(event, details = "Weekly coding meeting.", date = date(2025,11,1), start_time = time(18,0), end_time = time(19,0))
-
-    print(post_event(event.id))
+        if existing_admin:
+            print("Admin user already exists.")
+        else:
+            admin = User(level = "Admin", username = admin_username, password_hash = bcrypt.hashpw(admin_password.encode("utf-8"), bcrypt.gensalt()), modified_by = system.id)
+            db.session.add(admin)
+        
+         
+        db.session.commit()
+        print("Initial users created.")
+        app._admin_checked = True
     
-    db.session.commit()
+    
+        system = get_system_actor()
+        
+        user = create_user(system, "JohnDoe","User", "password")
+        org = create_organization(system, "Computer Science Club", "A club for students to build connections and learn more about special concepts in computer science.")
+
+        
+        add_member(system, user.id, org.id, permission_level="Admin")
+
+        user2 = create_user(system,"JaneSmith","User", "password")
+        add_member(system, user2.id, org.id, permission_level="Member")
+
+        event = create_event(user, "Coding Meeting", org.id, location="Ott Rm 121")
+
+        db.session.commit()
+        print("Database Seeded")
+    
+        print(post_event(event.id))
+
+        update(event, details = "Weekly coding meeting.", date = date(2025,11,1), start_time = time(18,0), end_time = time(19,0))
+
+        print(post_event(event.id))
+        
+        db.session.commit()
