@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event - Symvan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===================================
+         NAVIGATION BAR
+         =================================== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">Symvan</a>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="myevents.html">My Events</a></li>
+                <li><a href="enroll.html">Enroll</a></li>
+                <li><a href="create-event.html" class="active">Create Event</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- ===================================
+         CREATE EVENT PAGE
+         Form for creating new campus events
+         =================================== -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Create New Event</h1>
+            <p class="page-subtitle">Fill out the details for your campus event</p>
+        </div>
+        
+        <!-- Event Creation Form -->
+        <div class="form-container" style="max-width: 700px;">
+            <form action="index.html">
+                <!-- Event Title -->
+                <div class="form-group">
+                    <label for="event-title" class="form-label">Event Title *</label>
+                    <input 
+                        type="text" 
+                        id="event-title" 
+                        name="event-title" 
+                        class="form-input" 
+                        placeholder="e.g., Web Development Workshop"
+                        required
+                    >
+                </div>
+                
+                <!-- Event Description -->
+                <div class="form-group">
+                    <label for="event-description" class="form-label">Event Description *</label>
+                    <textarea 
+                        id="event-description" 
+                        name="event-description" 
+                        class="form-textarea" 
+                        placeholder="Provide a detailed description of your event..."
+                        required
+                    ></textarea>
+                </div>
+                
+                <!-- Event Category -->
+                <div class="form-group">
+                    <label for="event-category" class="form-label">Category *</label>
+                    <select id="event-category" name="event-category" class="form-select" required>
+                        <option value="">Select a category</option>
+                        <option value="academic">Academic</option>
+                        <option value="career">Career Development</option>
+                        <option value="social">Social</option>
+                        <option value="sports">Sports & Recreation</option>
+                        <option value="arts">Arts & Culture</option>
+                        <option value="technology">Technology</option>
+                        <option value="leadership">Leadership</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <!-- Date and Time -->
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="event-date" class="form-label">Event Date *</label>
+                        <input 
+                            type="date" 
+                            id="event-date" 
+                            name="event-date" 
+                            class="form-input"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-time" class="form-label">Event Time *</label>
+                        <input 
+                            type="time" 
+                            id="event-time" 
+                            name="event-time" 
+                            class="form-input"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <!-- Duration -->
+                <div class="form-group">
+                    <label for="event-duration" class="form-label">Duration (hours) *</label>
+                    <input 
+                        type="number" 
+                        id="event-duration" 
+                        name="event-duration" 
+                        class="form-input" 
+                        placeholder="2"
+                        min="0.5"
+                        step="0.5"
+                        required
+                    >
+                </div>
+                
+                <!-- Location -->
+                <div class="form-group">
+                    <label for="event-location" class="form-label">Location *</label>
+                    <input 
+                        type="text" 
+                        id="event-location" 
+                        name="event-location" 
+                        class="form-input" 
+                        placeholder="e.g., Tech Lab 101, Main Auditorium"
+                        required
+                    >
+                </div>
+                
+                <!-- Capacity -->
+                <div class="form-group">
+                    <label for="event-capacity" class="form-label">Maximum Capacity *</label>
+                    <input 
+                        type="number" 
+                        id="event-capacity" 
+                        name="event-capacity" 
+                        class="form-input" 
+                        placeholder="50"
+                        min="1"
+                        required
+                    >
+                    <p class="form-hint">Maximum number of attendees allowed</p>
+                </div>
+                
+                <!-- Organizer Information -->
+                <div class="form-group">
+                    <label for="organizer-name" class="form-label">Organizer Name *</label>
+                    <input 
+                        type="text" 
+                        id="organizer-name" 
+                        name="organizer-name" 
+                        class="form-input" 
+                        placeholder="Your name or organization"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="organizer-email" class="form-label">Contact Email *</label>
+                    <input 
+                        type="email" 
+                        id="organizer-email" 
+                        name="organizer-email" 
+                        class="form-input" 
+                        placeholder="contact@university.edu"
+                        required
+                    >
+                </div>
+                
+                <!-- Additional Options -->
+                <div class="form-group">
+                    <label>Additional Options</label>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                        <label>
+                            <input type="checkbox" class="form-checkbox" name="registration-required">
+                            Registration Required
+                        </label>
+                        <label>
+                            <input type="checkbox" class="form-checkbox" name="send-reminders">
+                            Send Email Reminders
+                        </label>
+                        <label>
+                            <input type="checkbox" class="form-checkbox" name="public-event">
+                            Make Event Public
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="grid grid-2" style="margin-top: var(--spacing-lg);">
+                    <a href="index.html" class="btn btn-secondary btn-block">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-block">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

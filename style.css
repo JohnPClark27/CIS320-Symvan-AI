@@ -1,0 +1,786 @@
+/* ===================================
+   SYMVAN - Campus Event Management System
+   CSS Stylesheet
+   Color Scheme: Cardinal Red, Greys, White
+   =================================== */
+
+/* ===================================
+   CSS RESET & ROOT VARIABLES
+   =================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette */
+    --cardinal-red: #C41E3A;
+    --cardinal-red-dark: #A01729;
+    --cardinal-red-light: #E63E5A;
+    --dark-grey: #333333;
+    --medium-grey: #666666;
+    --light-grey: #CCCCCC;
+    --very-light-grey: #F5F5F5;
+    --white: #FFFFFF;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+}
+
+/* ===================================
+   TYPOGRAPHY & BASE STYLES
+   =================================== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-grey);
+    background-color: var(--very-light-grey);
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    margin-bottom: var(--spacing-sm);
+    color: var(--dark-grey);
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+p {
+    margin-bottom: var(--spacing-sm);
+}
+
+a {
+    color: var(--cardinal-red);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--cardinal-red-dark);
+}
+
+/* ===================================
+   NAVIGATION BAR
+   =================================== */
+.navbar {
+    background-color: var(--white);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--cardinal-red);
+    text-decoration: none;
+}
+
+.navbar-menu {
+    display: flex;
+    list-style: none;
+    gap: var(--spacing-md);
+}
+
+.navbar-menu li a {
+    color: var(--dark-grey);
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.navbar-menu li a:hover {
+    background-color: var(--very-light-grey);
+    color: var(--cardinal-red);
+}
+
+.navbar-menu li a.active {
+    background-color: var(--cardinal-red);
+    color: var(--white);
+}
+
+/* ===================================
+   CONTAINER & LAYOUT
+   =================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-title {
+    color: var(--cardinal-red);
+    margin-bottom: var(--spacing-sm);
+}
+
+.page-subtitle {
+    color: var(--medium-grey);
+    font-size: 1.1rem;
+}
+
+/* ===================================
+   BUTTONS
+   =================================== */
+.btn {
+    display: inline-block;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--cardinal-red);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--cardinal-red-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--medium-grey);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--dark-grey);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--cardinal-red);
+    color: var(--cardinal-red);
+}
+
+.btn-outline:hover {
+    background-color: var(--cardinal-red);
+    color: var(--white);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* ===================================
+   FORMS
+   =================================== */
+.form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--dark-grey);
+    font-weight: 500;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 2px solid var(--light-grey);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: border-color var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--cardinal-red);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-checkbox {
+    width: auto;
+    margin-right: var(--spacing-xs);
+}
+
+.form-hint {
+    font-size: 0.875rem;
+    color: var(--medium-grey);
+    margin-top: var(--spacing-xs);
+}
+
+/* ===================================
+   CARDS
+   =================================== */
+.card {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    border-bottom: 2px solid var(--very-light-grey);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.card-title {
+    color: var(--cardinal-red);
+    margin-bottom: var(--spacing-xs);
+}
+
+.card-meta {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: 0.875rem;
+    color: var(--medium-grey);
+    margin-bottom: var(--spacing-sm);
+}
+
+.card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.card-body {
+    margin-bottom: var(--spacing-sm);
+}
+
+.card-footer {
+    border-top: 2px solid var(--very-light-grey);
+    padding-top: var(--spacing-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===================================
+   GRID LAYOUTS
+   =================================== */
+.grid {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===================================
+   STATS CARDS (Dashboard)
+   =================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--cardinal-red), var(--cardinal-red-dark));
+    color: var(--white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* ===================================
+   EVENT CARDS (Enroll Page)
+   =================================== */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.event-card {
+    position: relative;
+}
+
+.event-checkbox {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+/* Confirmation Message */
+.confirmation-message {
+    display: none;
+    background-color: #d4edda;
+    border: 2px solid #28a745;
+    color: #155724;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+.confirm-btn:focus + .confirmation-message,
+.confirm-btn:active + .confirmation-message {
+    display: block;
+}
+
+/* ===================================
+   CALENDAR (My Events Page)
+   =================================== */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    background-color: var(--white);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--cardinal-red);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: var(--light-grey);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.calendar-day-header {
+    background-color: var(--cardinal-red);
+    color: var(--white);
+    padding: var(--spacing-sm);
+    text-align: center;
+    font-weight: 600;
+}
+
+.calendar-day {
+    background-color: var(--white);
+    min-height: 100px;
+    padding: var(--spacing-xs);
+    position: relative;
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    color: var(--medium-grey);
+    margin-bottom: var(--spacing-xs);
+}
+
+.calendar-day.today {
+    background-color: var(--very-light-grey);
+}
+
+.calendar-day.today .calendar-day-number {
+    color: var(--cardinal-red);
+    font-weight: 700;
+}
+
+.calendar-event {
+    background-color: var(--cardinal-red);
+    color: var(--white);
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===================================
+   PLANNING BOARD (Kanban)
+   =================================== */
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+}
+
+.kanban-column {
+    background-color: var(--very-light-grey);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    min-height: 500px;
+}
+
+.kanban-header {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background-color: var(--cardinal-red);
+    color: var(--white);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.kanban-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.kanban-task {
+    background-color: #FFFACD;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--cardinal-red);
+    cursor: move;
+    transition: transform var(--transition-fast);
+}
+
+.kanban-task:hover {
+    transform: rotate(-1deg);
+    box-shadow: var(--shadow-md);
+}
+
+.kanban-task-title {
+    font-weight: 600;
+    color: var(--dark-grey);
+    margin-bottom: var(--spacing-xs);
+}
+
+.kanban-task-desc {
+    font-size: 0.875rem;
+    color: var(--medium-grey);
+}
+
+/* ===================================
+   PROFILE PAGE
+   =================================== */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--cardinal-red), var(--cardinal-red-dark));
+    color: var(--white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: var(--white);
+    margin: 0 auto var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--cardinal-red);
+    font-weight: 700;
+}
+
+.profile-name {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.profile-email {
+    opacity: 0.9;
+}
+
+.profile-section {
+    background-color: var(--white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.profile-section-title {
+    color: var(--cardinal-red);
+    border-bottom: 2px solid var(--very-light-grey);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+/* ===================================
+   CONTACT/ABOUT PAGE
+   =================================== */
+.about-section {
+    background-color: var(--white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.contact-item {
+    text-align: center;
+    padding: var(--spacing-md);
+}
+
+.contact-icon {
+    font-size: 2rem;
+    color: var(--cardinal-red);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ===================================
+   AUTH PAGES (Login/Signup)
+   =================================== */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--very-light-grey) 0%, var(--white) 100%);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    padding: var(--spacing-md);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.auth-logo h1 {
+    color: var(--cardinal-red);
+    font-size: 3rem;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: var(--spacing-md);
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+.text-center {
+    text-align: center;
+}
+
+.text-red {
+    color: var(--cardinal-red);
+}
+
+.text-grey {
+    color: var(--medium-grey);
+}
+
+.mb-sm {
+    margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+    margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+    margin-bottom: var(--spacing-lg);
+}
+
+.mt-sm {
+    margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+    margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+    margin-top: var(--spacing-lg);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+@media (max-width: 768px) {
+    /* Navigation */
+    .navbar-menu {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        justify-content: center;
+    }
+    
+    /* Typography */
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Grids */
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .event-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .kanban-board {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Calendar */
+    .calendar-day {
+        min-height: 80px;
+    }
+    
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Forms */
+    .form-container {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    .navbar-container {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .calendar-grid {
+        gap: 0;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 2px;
+    }
+    
+    .calendar-event {
+        font-size: 0.65rem;
+    }
+}

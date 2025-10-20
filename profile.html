@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Symvan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===================================
+         NAVIGATION BAR
+         =================================== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-brand">Symvan</a>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="myevents.html">My Events</a></li>
+                <li><a href="enroll.html">Enroll</a></li>
+                <li><a href="create-event.html">Create Event</a></li>
+                <li><a href="profile.html" class="active">Profile</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- ===================================
+         MANAGE PROFILE PAGE
+         User profile information and settings
+         =================================== -->
+    <div class="container">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">JD</div>
+                <h2 class="profile-name">John Doe</h2>
+                <p class="profile-email">john.doe@university.edu</p>
+            </div>
+            
+            <!-- Personal Information Section -->
+            <div class="profile-section">
+                <h3 class="profile-section-title">Personal Information</h3>
+                <form action="profile.html">
+                    <div class="form-group">
+                        <label for="full-name" class="form-label">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="full-name" 
+                            class="form-input" 
+                            value="John Doe"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-input" 
+                            value="john.doe@university.edu"
+                        >
+                    </div>
+                    
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="student-id" class="form-label">Student ID</label>
+                            <input 
+                                type="text" 
+                                id="student-id" 
+                                class="form-input" 
+                                value="123456789"
+                                readonly
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                class="form-input" 
+                                placeholder="(555) 123-4567"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="major" class="form-label">Major</label>
+                        <select id="major" class="form-select">
+                            <option>Computer Science</option>
+                            <option>Engineering</option>
+                            <option>Business Administration</option>
+                            <option>Arts & Humanities</option>
+                            <option>Natural Sciences</option>
+                            <option>Social Sciences</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="year" class="form-label">Year</label>
+                            <select id="year" class="form-select">
+                                <option>Freshman</option>
+                                <option>Sophomore</option>
+                                <option selected>Junior</option>
+                                <option>Senior</option>
+                                <option>Graduate</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="graduation" class="form-label">Expected Graduation</label>
+                            <input 
+                                type="month" 
+                                id="graduation" 
+                                class="form-input" 
+                                value="2026-05"
+                            >
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                </form>
+            </div>
+            
+            <!-- Interests Section -->
+            <div class="profile-section">
+                <h3 class="profile-section-title">Event Interests</h3>
+                <p class="text-grey mb-md">Select your areas of interest to receive personalized event recommendations</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-sm);">
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Academic
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Career Development
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox"> Social
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox"> Sports & Recreation
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Arts & Culture
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Technology
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox"> Leadership
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox"> Community Service
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Account Settings Section -->
+            <div class="profile-section">
+                <h3 class="profile-section-title">Account Settings</h3>
+                <form action="profile.html">
+                    <div class="form-group">
+                        <label for="current-password" class="form-label">Current Password</label>
+                        <input 
+                            type="password" 
+                            id="current-password" 
+                            class="form-input" 
+                            placeholder="Enter current password"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password" class="form-label">New Password</label>
+                        <input 
+                            type="password" 
+                            id="new-password" 
+                            class="form-input" 
+                            placeholder="Enter new password"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm-new-password" class="form-label">Confirm New Password</label>
+                        <input 
+                            type="password" 
+                            id="confirm-new-password" 
+                            class="form-input" 
+                            placeholder="Re-enter new password"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Update Password</button>
+                </form>
+            </div>
+            
+            <!-- Notification Preferences -->
+            <div class="profile-section">
+                <h3 class="profile-section-title">Notification Preferences</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Email notifications for new events
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Event reminders (24 hours before)
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Weekly event digest
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox"> SMS notifications
+                    </label>
+                    <label>
+                        <input type="checkbox" class="form-checkbox" checked> Event updates and changes
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Account Actions -->
+            <div class="grid grid-2 mt-md">
+                <a href="login.html" class="btn btn-secondary btn-block">Logout</a>
+                <a href="contact.html" class="btn btn-outline btn-block">Need Help?</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

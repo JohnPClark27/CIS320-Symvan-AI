@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Symvan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===================================
+         LOGIN PAGE
+         Authentication page for existing users
+         =================================== -->
+    
+    <div class="auth-page">
+        <div class="auth-container">
+            <!-- Logo/Branding -->
+            <div class="auth-logo">
+                <h1>Symvan</h1>
+                <p class="text-grey">Campus Event Management</p>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="form-container">
+                <h2 class="text-center mb-md">Welcome Back</h2>
+                
+                <form action="index.html">
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input" 
+                            placeholder="your.email@university.edu"
+                            required
+                        >
+                    </div>
+                    
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="Enter your password"
+                            required
+                        >
+                    </div>
+                    
+                    <!-- Remember Me Checkbox -->
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" class="form-checkbox" name="remember">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Sign In
+                    </button>
+                </form>
+                
+                <!-- Additional Links -->
+                <div class="auth-links">
+                    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+                    <p><a href="contact.html">Forgot your password?</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
