@@ -34,14 +34,14 @@ def setup():
         if existing_system:
             print("System user already exist.")
         else:
-            system = User(level = "Admin", username = "System", password_hash = bcrypt.hashpw(system_password.encode("utf-8"), bcrypt.gensalt()), modified_by = None)
+            system = User(level = "Admin", username = "System", password_hash = bcrypt.hashpw(system_password.encode("utf-8"), bcrypt.gensalt()))
             db.session.add(system)
             db.session.flush()
 
         if existing_admin:
             print("Admin user already exists.")
         else:
-            admin = User(level = "Admin", username = admin_username, password_hash = bcrypt.hashpw(admin_password.encode("utf-8"), bcrypt.gensalt()), modified_by = system.id)
+            admin = User(level = "Admin", username = admin_username, password_hash = bcrypt.hashpw(admin_password.encode("utf-8"), bcrypt.gensalt()))
             db.session.add(admin)
         
          
@@ -51,25 +51,49 @@ def setup():
     
     
         system = get_system_actor()
-        
+
         user = create_user(system, "JohnDoe","User", "password")
+        if isinstance(user, str):
+            print(f"Error creating user: {user}")
+            user = get_user_by_username("JohnDoe")
+            if not user:
+                print("Failed to retrieve existing user JohnDoe.")
+                return
         org = create_organization(system, "Computer Science Club", "A club for students to build connections and learn more about special concepts in computer science.")
 
-        
-        add_member(system, user.id, org.id, permission_level="Admin")
+        if isinstance(org, str):
+            print(f"Error creating organization: {org}")
+            org = get_organization_by_name("Computer Science Club")
+            if not org:
+                print("Failed to retrieve existing organization Computer Science Club.")
+                return
+        db.session.flush()
+        add_member(user, user.id, org.id, permission_level="Owner")
 
         user2 = create_user(system,"JaneSmith","User", "password")
-        add_member(system, user2.id, org.id, permission_level="Member")
+        if isinstance(user2, str):
+            print(f"Error creating user: {user2}")
+            user2 = get_user_by_username("JaneSmith")
+            if not user2:
+                print("Failed to retrieve existing user JaneSmith.")
+                return
+        add_member(user2, user2.id, org.id, permission_level="Member")
 
         event = create_event(user, "Coding Meeting", org.id, location="Ott Rm 121")
-
+        if isinstance(event, str):
+            print(f"Error creating event: {event}")
+            event = get_event_by_name("Coding Meeting")
+            if not event:
+                print("Failed to retrieve existing event Coding Meeting.")
+                return
+        
         db.session.commit()
         print("Database Seeded")
     
-        print(post_event(event.id))
+        print(post_event(user,event.id))
 
-        update(event, details = "Weekly coding meeting.", date = date(2025,11,1), start_time = time(18,0), end_time = time(19,0))
+        print(update_event(user, event.id, details = "Weekly coding meeting.", date = date(2025,11,1), start_time = time(18,0), end_time = time(19,0)))
 
-        print(post_event(event.id))
-        
+        print(post_event(user,event.id))
+
         db.session.commit()
