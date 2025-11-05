@@ -111,12 +111,7 @@ $conn->close();
                     <input type="password" id="confirm-password" name="confirm-password" class="form-input" placeholder="Re-enter your password" required>
                 </div>
 
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" class="form-checkbox" name="terms" required>
-                        I agree to the <a href="contact.php">Terms and Conditions</a>
-                    </label>
-                </div>
+                
 
                 <button type="submit" class="btn btn-primary btn-block">
                     Create Account

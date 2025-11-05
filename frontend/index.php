@@ -1,6 +1,13 @@
 <?php
 
 session_start();
+
+// Redirect if not logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // ===========================================
 // DATABASE CONNECTION (XAMPP)
 // ===========================================
@@ -16,34 +23,42 @@ $totalEventsQuery = $conn->query("SELECT COUNT(*) AS total FROM event");
 $totalEvents = $totalEventsQuery->fetch_assoc()["total"];
 
 // Total participants (placeholder until attendees table or join exists)
-$totalParticipants = $conn->query("
-    SELECT COALESCE(SUM(0), 0) AS total
-")->fetch_assoc()["total"];
+$totalParticipantsQuery = $conn->query("SELECT COUNT(*) AS total FROM enrollment");
+$totalParticipants = $totalParticipantsQuery->fetch_assoc()["total"];
 
 // Upcoming events this week
 $upcomingWeekQuery = $conn->query("
     SELECT COUNT(*) AS total 
     FROM event 
-    WHERE date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+    WHERE date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status = 'Posted'
 ");
 $upcomingWeek = $upcomingWeekQuery->fetch_assoc()["total"];
 
-// Enrolled events (hardcoded for now – replace with join later)
-$enrolledEvents = 12;
+$enrolledEventsQuery = $conn->query("SELECT COUNT(*) AS total FROM enrollment WHERE user_id = " . intval($user_id));
+$enrolledEvents = $enrolledEventsQuery->fetch_assoc()["total"];
 
 // ===========================================
 // FETCH ALL UPCOMING EVENTS
 // ===========================================
 $eventsQuery = "
-    SELECT e.id, e.name, e.details, e.date, e.start_time, e.end_time, e.location, o.name AS org_name
+    SELECT e.id, e.name, e.details, e.date, e.start_time, e.end_time, e.location, e.attendees, o.name AS org_name
     FROM event e
     LEFT JOIN organization o ON e.organization_id = o.id
-    WHERE e.date >= CURDATE()
+    WHERE e.date >= CURDATE() AND e.status = 'Posted' AND date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     ORDER BY e.date ASC
 ";
 
 $eventsResult = $conn->query($eventsQuery);
 $events = $eventsResult->fetch_all(MYSQLI_ASSOC);
+// Update attendees count for each event
+foreach ($events as $event) {
+    $eventID = $event['id'];
+    $attendeesQuery = $conn->query("SELECT COUNT(*) AS total FROM enrollment WHERE event_id = " . intval($eventID));
+    $attendeesCount = $attendeesQuery->fetch_assoc()["total"];
+    $conn->query("UPDATE event SET attendees = " . intval($attendeesCount) . " WHERE id = " . intval($eventID));
+
+}
+
 
 $conn->close();
 ?>
@@ -67,7 +82,7 @@ $conn->close();
                 <li><a href="index.php" class="active">Home</a></li>
                 <li><a href="myevents.php">My Events</a></li>
                 <li><a href="enroll.php">Enroll</a></li>
-                <li><a href="create-event.php">Create Event</a></li>
+                <li><a href="create_event.php">Create Event</a></li>
                 <li><a href="profile.php">Profile</a></li>
             </ul>
         </div>
@@ -128,8 +143,8 @@ $conn->close();
                                 <p><?php echo htmlspecialchars($event['details']); ?></p>
                             </div>
                             <div class="card-footer">
-                                <span>0 attendees</span>
-                                <a href="myevents.php?id=<?php echo $event['id']; ?>" class="btn btn-primary">View Details</a>
+                                <span><?php echo htmlspecialchars($event['attendees']); ?> attendees</span>
+                                <a href="enroll.php" class="btn btn-primary">Enroll</a>
                             </div>
                         </div>
                     <?php endforeach; ?>

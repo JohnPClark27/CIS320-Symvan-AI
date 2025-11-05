@@ -72,9 +72,8 @@ $conn->close();
             <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
             <li><a href="enroll.php">Enroll</a></li>
-            <li><a href="create-event.php" class="active">Create Event</a></li>
+            <li><a href="create_event.php" class="active">Create Event</a></li>
             <li><a href="profile.php">Profile</a></li>
-            <li><a href="contact.php">Contact</a></li>
         </ul>
     </div>
 </nav>
