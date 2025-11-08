@@ -8,16 +8,16 @@ Rather than using a variety of different sources to gather information about cam
 
 - View of all upcoming campus events
 - Calendar view
-- Ability to message event organizers
-- Event drafts
+- View list of organizations
+- Create event drafts
 - To-do list planners for events
 
 # Full Stack
 
-- Frontend: HTML, CSS, JavaScript
+- Frontend: HTML, CSS, PHP
 - Backend: Python
 - Database: mySQL
-- AI: Few shot method used to help enhance user experience
+- AI: OpenAI using a few shot method used to help enhance user experience
 
 # Setup
 Please follow the steps defined in the /SETUP.md file.
