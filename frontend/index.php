@@ -83,6 +83,8 @@ $conn->close();
                 <li><a href="myevents.php">My Events</a></li>
                 <li><a href="enroll.php">Enroll</a></li>
                 <li><a href="create_event.php">Create Event</a></li>
+                <li><a href="planning.php">Planning Board</a></li>
+                <li><a href="chatbot.html">AI Assistant</a></li>
                 <li><a href="profile.php">Profile</a></li>
             </ul>
         </div>

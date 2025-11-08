@@ -27,13 +27,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Passwords do not match.";
     } else {
         // Check if email already exists
-        $check = $conn->prepare("SELECT id FROM user WHERE email = ?");
-        $check->bind_param("s", $email);
-        $check->execute();
-        $check->store_result();
+        $checkEmail = $conn->prepare("SELECT id FROM user WHERE email = ?");
+        $checkEmail->bind_param("s", $email);
+        $checkEmail->execute();
+        $checkEmail->store_result();
 
-        if ($check->num_rows > 0) {
+        // Check if username already exists
+        $checkName = $conn->prepare("SELECT id FROM user WHERE username = ?");
+        $checkName->bind_param("s", $fullname);
+        $checkName->execute();
+        $checkName->store_result();
+
+        if ($checkEmail->num_rows > 0) {
             $errorMessage = "An account with this email already exists.";
+        } else if ($checkName->num_rows > 0) {
+            $errorMessage = "An account with this username already exists.";
         } else {
             // Hash password securely
             $hashed = password_hash($password, PASSWORD_DEFAULT);
@@ -51,9 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $stmt->close();
+            
+    
         }
 
-        $check->close();
+        $checkEmail->close();
+        $checkName->close();
     }
 }
 
@@ -98,7 +109,7 @@ $conn->close();
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" required>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" required>
                 </div>
 
                 <div class="form-group">

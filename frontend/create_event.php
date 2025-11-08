@@ -66,17 +66,19 @@ $conn->close();
 <body>
 
 <nav class="navbar">
-    <div class="navbar-container">
-        <a href="index.php" class="navbar-brand">Symvan</a>
-        <ul class="navbar-menu">
-            <li><a href="index.php">Home</a></li>
-            <li><a href="myevents.php">My Events</a></li>
-            <li><a href="enroll.php">Enroll</a></li>
-            <li><a href="create_event.php" class="active">Create Event</a></li>
-            <li><a href="profile.php">Profile</a></li>
-        </ul>
-    </div>
-</nav>
+        <div class="navbar-container">
+            <a href="index.php" class="navbar-brand">Symvan</a>
+            <ul class="navbar-menu">
+                <li><a href="index.php">Home</a></li>
+                <li><a href="myevents.php">My Events</a></li>
+                <li><a href="enroll.php">Enroll</a></li>
+                <li><a href="create_event.php" class="active">Create Event</a></li>
+                <li><a href="planning.php">Planning Board</a></li>
+                <li><a href="chatbot.html">AI Assistant</a></li>
+                <li><a href="profile.php">Profile</a></li>
+            </ul>
+        </div>
+    </nav>
 
 <div class="container">
 
