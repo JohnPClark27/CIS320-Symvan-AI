@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         "model" => "gpt-4o-mini",
         "messages" => [
-            ["role" => "system", "content" => "You are Symvan, an event planning assistant."],
+            ["role" => "system", "content" => "You are Symvan, an event assistant. You must ALWAYS keep replies short, less than 200 characters with NO EXCEPTIONS."],
             ["role" => "user", "content" => $userPrompt]
         ],
         "temperature" => 0.7
@@ -61,7 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     curl_close($ch);
 
     $result = json_decode($response, true);
-    echo json_encode(['reply' => $result['choices'][0]['message']['content'] ?? 'No response from AI']);
+
+    // extract model text
+    $reply = $result['choices'][0]['message']['content'] ?? "No response";
+
+    // *** ABSOLUTE HARD LIMIT HERE ***
+    $reply = mb_substr($reply, 0, 200);
+
+    echo json_encode(['reply' => $reply]);
     exit;
 }
 ?>
@@ -175,9 +182,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+        
     <!-- ===================================
-         NAVIGATION
-         =================================== -->
+        NAVIGATION BAR
+        =================================== -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="index.php" class="navbar-brand">Symvan</a>
@@ -185,13 +193,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="index.php">Home</a></li>
                 <li><a href="myevents.php">My Events</a></li>
                 <li><a href="enroll.php">Enroll</a></li>
-                <li><a href="create_event.php">Create Event</a></li>
-                <li><a href="planning.php">Planning Board</a></li>
-                <li><a href="chatbot.html" class="active">AI Assistant</a></li>
+                <li><a href="organization.php">Organizations</a></li>
+                <li><a href="create_event.php" class="active">Create Event</a></li>
                 <li><a href="profile.php">Profile</a></li>
             </ul>
+            <div class="user-session">
+                <?php if (isset($_SESSION['email'])): ?>
+                    <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
+                    <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
+                <?php endif; ?>
+            </div>
         </div>
     </nav>
+
 
     <!-- ===================================
          CHATBOT PAGE
@@ -219,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="quick-buttons">
                     <button class="btn btn-outline" data-prompt="Suggest a fun theme for a spring festival.">Spring theme</button>
                     <button class="btn btn-outline" data-prompt="Write a catchy description for a fundraising dinner.">Event description</button>
-                    <button class="btn btn-outline" data-prompt="What’s the best time for a commuter event?">Timing</button>
+                    <button class="btn btn-outline" data-prompt="What is the best time for a commuter event?">Timing</button>
                     <button class="btn btn-outline" data-prompt="Ideas for student engagement at a concert night.">Engagement ideas</button>
                 </div>
             </aside>

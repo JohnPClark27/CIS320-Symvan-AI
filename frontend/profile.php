@@ -110,11 +110,16 @@ $conn->close();
             <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
             <li><a href="enroll.php">Enroll</a></li>
+            <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php">Create Event</a></li>
-            <li><a href="planning.php">Planning Board</a></li>
-            <li><a href="chatbot.html">AI Assistant</a></li>
             <li><a href="profile.php" class="active">Profile</a></li>
         </ul>
+        <div class="user-session">
+            <?php if (isset($_SESSION['email'])): ?>
+                <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
+                <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
+            <?php endif; ?>
+        </div>
     </div>
 </nav>
 
