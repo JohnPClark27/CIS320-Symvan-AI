@@ -4,6 +4,8 @@
 // ===========================================
 session_start();
 
+require_once 'audit.php'; // Include audit function
+
 // ===========================================
 // DATABASE CONNECTION
 // ===========================================
@@ -51,12 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES ('User', ?, ?, ?)
             ");
             $stmt->bind_param("sss", $fullname, $email, $hashed);
+            
+            
 
             if ($stmt->execute()) {
                 $successMessage = "Account created successfully! You can now log in.";
+
+                $newUserId = $conn->insert_id;
+                // Add new user to audit_log
+                log_audit($conn, $newUserId, 'Created new user account', $newUserId);
             } else {
                 $errorMessage = "Something went wrong. Please try again.";
             }
+
+            
 
             $stmt->close();
             

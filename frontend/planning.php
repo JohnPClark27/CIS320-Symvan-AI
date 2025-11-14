@@ -4,6 +4,8 @@
 // ===========================================
 session_start();
 
+require_once 'audit.php'; // Include audit function
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -54,6 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task-title'])) {
         $stmt->bind_param("sssii", $title, $desc, $status, $user_id, $event_id);
         if ($stmt->execute()) {
             $successMessage = "✅ Task added successfully!";
+
+            $newTaskId = $conn->insert_id;
+            // Add to audit_log
+            log_audit($conn, $user_id, 'Created new task', $newTaskId);
         } else {
             $errorMessage = "❌ Failed to add task.";
         }

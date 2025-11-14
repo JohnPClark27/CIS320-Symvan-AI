@@ -7,7 +7,7 @@
 require __DIR__ . '/vendor/autoload.php'; // <-- corrected path
 
 // load .env
-$dotenv = Dotenv\Dotenv::createImmutable('/var/www/');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__); // Use '/var/www/' on server
 $dotenv->load();
 
 $host = 'localhost';

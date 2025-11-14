@@ -5,6 +5,8 @@
 
 session_start();
 
+require_once 'audit.php'; // Include audit function
+
 // ===========================================
 // DATABASE CONNECTION (XAMPP)
 // ===========================================
@@ -46,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $userData['id'];
                 $_SESSION['email'] = $userData['email'];
                 $_SESSION['username'] = $userData['username'];
+
+                // Update audit_log
+                log_audit($conn, $userData['id'], 'User logged in', $userData['id']);
 
                 header("Location: index.php");
                 exit();

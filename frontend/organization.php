@@ -2,6 +2,8 @@
 session_start();
 require_once 'db_connect.php';
 
+require_once 'audit.php'; // Include audit function
+
 // Redirect to login if user is not signed in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -40,6 +42,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['organization_id'])) {
                 $insert->bind_param("ii", $user_id, $org_id);
                 $insert->execute();
                 $message = "✅ Joined as admin successfully!";
+
+                // Update audit_log
+                log_audit($conn, $user_id, 'Joined organization as Admin', $org_id);
             } else {
                 $message = "❌ Incorrect admin password.";
             }
@@ -48,6 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['organization_id'])) {
             $insert->bind_param("ii", $user_id, $org_id);
             $insert->execute();
             $message = "✅ Joined as member successfully!";
+
+            // Update audit_log
+            log_audit($conn, $user_id, 'Joined organization as Member', $org_id);
         }
     }
 }
@@ -64,6 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['leave_id'])) {
 
     if ($delete_stmt->affected_rows > 0) {
         $message = "✅ You have left the organization successfully.";
+        // Update audit_log
+        log_audit($conn, $user_id, 'Left organization', $org_id);
     } else {
         $message = "⚠️ You were not part of that organization.";
     }

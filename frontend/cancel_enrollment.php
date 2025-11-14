@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once 'audit.php'; // Include audit function
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -17,6 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_id'])) {
     $stmt = $conn->prepare("DELETE FROM enrollment WHERE user_id = ? AND event_id = ?");
     $stmt->bind_param("ii", $user_id, $event_id);
     $stmt->execute();
+
+    // Log audit
+    log_audit($conn, $user_id, 'Canceled enrollment', $event_id);
 
     $stmt->close();
     $conn->close();

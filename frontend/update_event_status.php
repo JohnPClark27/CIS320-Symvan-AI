@@ -12,6 +12,8 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'db_connect.php';
 $user_id = $_SESSION['user_id'];
 
+require_once 'audit.php'; // Include audit function
+
 // ===========================================
 // VALIDATE INPUT
 // ===========================================
@@ -52,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $updateStmt = $conn->prepare("UPDATE event SET status = ? WHERE id = ?");
     $updateStmt->bind_param("si", $new_status, $event_id);
     $updateStmt->execute();
+
+    // Update audit_log
+    log_audit($conn, $user_id, 'Updated event status', $event_id);
+
     $updateStmt->close();
 
     // ===========================================

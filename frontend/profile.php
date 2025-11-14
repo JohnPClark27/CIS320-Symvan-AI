@@ -4,6 +4,8 @@
 // ===========================================
 session_start();
 
+require_once 'audit.php'; // Include audit function
+
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -57,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     ");
     $stmt->bind_param("isssss", $user_id, $phone, $major, $year, $graduation, $interests);
     $stmt->execute();
+
+    // Update audit_log
+    log_audit($conn, $user_id, 'Updated profile information', $user_id);
+
     $stmt->close();
 
     $successMessage = "Profile updated successfully!";
@@ -86,6 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
         $update = $conn->prepare("UPDATE user SET password_hash = ? WHERE id = ?");
         $update->bind_param("si", $newHash, $user_id);
         $update->execute();
+
+        // Update audit_log
+        log_audit($conn, $user_id, 'Updated account password', $user_id);
+
         $update->close();
         $successMessage = "Password updated successfully!";
     }
