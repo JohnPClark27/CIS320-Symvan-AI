@@ -77,6 +77,10 @@ if (isset($_POST['delete_task_id'])) {
     $delStmt = $conn->prepare("DELETE FROM task WHERE id = ? AND created_by = ?");
     $delStmt->bind_param("ii", $delete_id, $user_id);
     $delStmt->execute();
+
+    // Update audit_log
+    log_audit($conn, $user_id, 'Deleted task', $delete_id);
+    
     $delStmt->close();
     $successMessage = "🗑️ Task deleted successfully!";
 }
