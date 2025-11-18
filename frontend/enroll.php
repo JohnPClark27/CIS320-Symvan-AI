@@ -4,7 +4,6 @@
 // ===========================================
 session_start();
 require_once 'db_connect.php';
-require_once 'audit.php'; // Include audit function
 
 $user_id = $_SESSION["user_id"] ?? null;
 $successMessage = "";
@@ -23,14 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         foreach ($event_ids as $event_id) {
             $stmt->bind_param("ii", $user_id, $event_id);
             $stmt->execute();
-            // Update audit_log
-            $auditStmt = $conn->prepare("
-                INSERT INTO audit_log (user_id, action_description, affected_id, created_at)
-                VALUES (?, 'Enrolled in event', ?, NOW())
-            ");
-            $auditStmt->bind_param("ii", $user_id, $event_id);
-            $auditStmt->execute();
-            $auditStmt->close();
         }
         $stmt->close();
         $successMessage = "Successfully enrolled in selected events!";
@@ -40,10 +31,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt = $conn->prepare("DELETE FROM enrollment WHERE user_id = ? AND event_id = ?");
         $stmt->bind_param("ii", $user_id, $unenroll_id);
         $stmt->execute();
-
-        //Update audit_log
-        log_audit($conn, $user_id, 'Unenrolled from event', $unenroll_id);
-
         $stmt->close();
         $successMessage = "You have been unenrolled from the event.";
     }
@@ -91,7 +78,7 @@ $conn->close();
         <ul class="navbar-menu">
             <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
-            <li><a href="enroll.php" class="active">Enroll</a></li>
+            <li><a href="enroll.php" class="active">Browse Events</a></li>
             <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php">Create Event</a></li>
             <li><a href="profile.php">Profile</a></li>

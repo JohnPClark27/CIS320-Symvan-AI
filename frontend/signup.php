@@ -4,8 +4,6 @@
 // ===========================================
 session_start();
 
-require_once 'audit.php'; // Include audit function
-
 // ===========================================
 // DATABASE CONNECTION
 // ===========================================
@@ -29,21 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Passwords do not match.";
     } else {
         // Check if email already exists
-        $checkEmail = $conn->prepare("SELECT id FROM user WHERE email = ?");
-        $checkEmail->bind_param("s", $email);
-        $checkEmail->execute();
-        $checkEmail->store_result();
+        $check = $conn->prepare("SELECT id FROM user WHERE email = ?");
+        $check->bind_param("s", $email);
+        $check->execute();
+        $check->store_result();
 
-        // Check if username already exists
-        $checkName = $conn->prepare("SELECT id FROM user WHERE username = ?");
-        $checkName->bind_param("s", $fullname);
-        $checkName->execute();
-        $checkName->store_result();
-
-        if ($checkEmail->num_rows > 0) {
+        if ($check->num_rows > 0) {
             $errorMessage = "An account with this email already exists.";
-        } else if ($checkName->num_rows > 0) {
-            $errorMessage = "An account with this username already exists.";
         } else {
             // Hash password securely
             $hashed = password_hash($password, PASSWORD_DEFAULT);
@@ -53,28 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES ('User', ?, ?, ?)
             ");
             $stmt->bind_param("sss", $fullname, $email, $hashed);
-            
-            
 
             if ($stmt->execute()) {
                 $successMessage = "Account created successfully! You can now log in.";
-
-                $newUserId = $conn->insert_id;
-                // Add new user to audit_log
-                log_audit($conn, $newUserId, 'Created new user account', $newUserId);
             } else {
                 $errorMessage = "Something went wrong. Please try again.";
             }
 
-            
-
             $stmt->close();
-            
-    
         }
 
-        $checkEmail->close();
-        $checkName->close();
+        $check->close();
     }
 }
 
@@ -119,7 +98,7 @@ $conn->close();
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" required>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" required>
                 </div>
 
                 <div class="form-group">

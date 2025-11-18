@@ -60,7 +60,7 @@ $conn->close();
         <ul class="navbar-menu">
             <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php" class="active">My Events</a></li>
-            <li><a href="enroll.php">Enroll</a></li>
+            <li><a href="enroll.php">Browse Events</a></li>
             <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php">Create Event</a></li>
             <li><a href="profile.php">Profile</a></li>
