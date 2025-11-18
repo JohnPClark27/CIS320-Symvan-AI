@@ -100,6 +100,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
         $successMessage = "Password updated successfully!";
     }
 }
+// ===========================================
+// HANDLE ACCOUNT DELETE
+// ===========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
+
+    // PROFILE
+    $stmt = $conn->prepare("DELETE FROM user_profile WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // ENROLLMENTS
+    $stmt = $conn->prepare("DELETE FROM enrollment WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // MEMBERSHIPS
+    $stmt = $conn->prepare("DELETE FROM member WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // TASKS
+    $stmt = $conn->prepare("DELETE FROM task WHERE created_by = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // USER ACCOUNT
+    $stmt = $conn->prepare("DELETE FROM user WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    session_destroy();
+
+    header("Location: login.php?deleted=1");
+    exit();
+}
 
 $conn->close();
 ?>
@@ -113,6 +153,7 @@ $conn->close();
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <!-- ===================================
      NAVIGATION BAR
      =================================== -->
@@ -124,7 +165,7 @@ $conn->close();
 
         <!-- CENTER - Menu -->
         <ul class="navbar-center-menu">
-            <li><a href="index.php" >Home</a></li>
+            <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
             <li><a href="enroll.php">Enroll</a></li>
             <li><a href="organization.php">Organizations</a></li>
@@ -144,49 +185,54 @@ $conn->close();
     </div>
 </nav>
 
+
 <div class="container">
     <div class="profile-container">
+
         <div class="page-header">
             <h1 class="page-title">My Profile</h1>
             <p class="page-subtitle">Manage your account and preferences</p>
         </div>
 
         <?php if ($successMessage): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($successMessage); ?></div>
+            <div class="alert alert-success"><?= htmlspecialchars($successMessage) ?></div>
         <?php elseif ($errorMessage): ?>
-            <div class="alert alert-error"><?php echo htmlspecialchars($errorMessage); ?></div>
+            <div class="alert alert-error"><?= htmlspecialchars($errorMessage) ?></div>
         <?php endif; ?>
 
-        <!-- Personal Information -->
+        <!-- ===========================
+             PERSONAL INFORMATION
+        ============================ -->
         <div class="profile-section">
             <h3 class="profile-section-title">Personal Information</h3>
+
             <form action="profile.php" method="POST">
                 <div class="form-group">
-                    <label for="full-name" class="form-label">Full Name</label>
-                    <input type="text" id="full-name" class="form-input" value="<?php echo htmlspecialchars($user['username']); ?>" readonly>
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" value="<?= htmlspecialchars($user['username']); ?>" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" class="form-input" value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" value="<?= htmlspecialchars($user['email']); ?>" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" class="form-input" value="<?php echo htmlspecialchars($profile['phone'] ?? ''); ?>">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" name="phone" class="form-input" value="<?= htmlspecialchars($profile['phone'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
-                    <label for="major" class="form-label">Major</label>
-                    <input type="text" id="major" name="major" class="form-input" value="<?php echo htmlspecialchars($profile['major'] ?? ''); ?>">
+                    <label class="form-label">Major</label>
+                    <input type="text" name="major" class="form-input" value="<?= htmlspecialchars($profile['major'] ?? ''); ?>">
                 </div>
 
                 <div class="grid grid-2">
                     <div class="form-group">
-                        <label for="year" class="form-label">Year</label>
-                        <select id="year" name="year" class="form-select">
+                        <label class="form-label">Year</label>
+                        <select name="year" class="form-select">
                             <?php
-                            $years = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
+                            $years = ['Freshman','Sophomore','Junior','Senior','Graduate'];
                             $selectedYear = $profile['year'] ?? '';
                             foreach ($years as $yr) {
                                 $sel = ($yr === $selectedYear) ? 'selected' : '';
@@ -195,20 +241,23 @@ $conn->close();
                             ?>
                         </select>
                     </div>
+
                     <div class="form-group">
-                        <label for="graduation" class="form-label">Expected Graduation</label>
-                        <input type="month" id="graduation" name="graduation" class="form-input" value="<?php echo htmlspecialchars($profile['graduation_month'] ?? ''); ?>">
+                        <label class="form-label">Graduation Month</label>
+                        <input type="month" name="graduation" class="form-input"
+                               value="<?= htmlspecialchars($profile['graduation_month'] ?? ''); ?>">
                     </div>
                 </div>
 
                 <p class="form-label mt-md">Event Interests</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-sm);">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--spacing-sm);">
+
                     <?php
-                    $allInterests = ['Academic','Career Development','Social','Sports & Recreation','Arts & Culture','Technology','Leadership','Community Service'];
+                    $all = ['Academic','Career Development','Social','Sports & Recreation','Arts & Culture','Technology','Leadership','Community Service'];
                     $selected = explode(", ", $profile['interests'] ?? '');
-                    foreach ($allInterests as $i) {
-                        $checked = in_array($i, $selected) ? 'checked' : '';
-                        echo "<label><input type='checkbox' name='interests[]' class='form-checkbox' value='$i' $checked> $i</label>";
+                    foreach ($all as $i) {
+                        $checked = in_array($i,$selected) ? 'checked' : '';
+                        echo "<label><input type='checkbox' name='interests[]' value='$i' $checked> $i</label>";
                     }
                     ?>
                 </div>
@@ -217,34 +266,78 @@ $conn->close();
             </form>
         </div>
 
-        <!-- Account Settings -->
+        <!-- ===========================
+             CHANGE PASSWORD
+        ============================ -->
         <div class="profile-section">
             <h3 class="profile-section-title">Change Password</h3>
+
             <form action="profile.php" method="POST">
+
                 <div class="form-group">
-                    <label for="current-password" class="form-label">Current Password</label>
-                    <input type="password" id="current-password" name="current-password" class="form-input" required>
+                    <label class="form-label">Current Password</label>
+                    <input type="password" name="current-password" class="form-input" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="new-password" class="form-label">New Password</label>
-                    <input type="password" id="new-password" name="new-password" class="form-input" required>
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="new-password" class="form-input" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="confirm-new-password" class="form-label">Confirm New Password</label>
-                    <input type="password" id="confirm-new-password" name="confirm-new-password" class="form-input" required>
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" name="confirm-new-password" class="form-input" required>
                 </div>
 
                 <button type="submit" name="update_password" class="btn btn-primary btn-block">Update Password</button>
             </form>
         </div>
 
-        <!-- Logout -->
-        <div class="grid grid mt-md">
-            <a href="logout.php" class="btn btn-secondary btn-block">Logout</a>
-        </div>
+        <!-- ===========================
+             DELETE ACCOUNT
+        ============================ -->
+        <!-- ===========================
+     DELETE ACCOUNT (DANGER ZONE)
+=========================== -->
+    <div class="profile-section" 
+     style="
+        margin-top:2rem;
+        padding:1.5rem;
+        border:2px solid #cc0000;
+        background:#ffe6e6;
+        border-radius:10px;
+     ">
+
+    <h3 class="profile-section-title" 
+        style="color:#cc0000; font-weight:800; margin-bottom:0.5rem;">
+        ⚠️ Warning
+    </h3>
+
+    <p style="color:#660000; font-size:1rem; margin-bottom:1rem;">
+        Deleting your account is <strong>permanent</strong>. All of your profile data,  
+        memberships, enrollments, tasks, and login access will be erased forever.
+    </p>
+
+    <form action="profile.php" method="POST"
+          onsubmit="return confirm('⚠️ Are you absolutely sure? This action cannot be undone.');">
+
+        <button type="submit" name="delete_account"
+                class="btn btn-danger btn-block"
+                style="
+                    background:#cc0000;
+                    border:none;
+                    font-size:1.1rem;
+                    padding:0.75rem;
+                    font-weight:700;
+                ">
+            Delete My Account Permanently
+        </button>
+    </form>
+    </div>
+
+
     </div>
 </div>
+
 </body>
 </html>

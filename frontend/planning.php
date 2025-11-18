@@ -55,17 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task-title'])) {
         ");
         $stmt->bind_param("sssii", $title, $desc, $status, $user_id, $event_id);
         if ($stmt->execute()) {
-            $successMessage = "✅ Task added successfully!";
+            $successMessage = "Task added successfully!";
 
-            $newTaskId = $conn->insert_id;
-            // Add to audit_log
-            log_audit($conn, $user_id, 'Created new task', $newTaskId);
+            log_audit($conn, $user_id, "Added new task", $event_id);
         } else {
-            $errorMessage = "❌ Failed to add task.";
+            $errorMessage = "Failed to add task.";
         }
         $stmt->close();
     } else {
-        $errorMessage = "⚠️ Please fill out the required fields.";
+        $errorMessage = "Please fill out the required fields.";
     }
 }
 
@@ -77,21 +75,18 @@ if (isset($_POST['delete_task_id'])) {
     $delStmt = $conn->prepare("DELETE FROM task WHERE id = ? AND created_by = ?");
     $delStmt->bind_param("ii", $delete_id, $user_id);
     $delStmt->execute();
-
-    // Update audit_log
-    log_audit($conn, $user_id, 'Deleted task', $delete_id);
-    
     $delStmt->close();
-    $successMessage = "🗑️ Task deleted successfully!";
+    $successMessage = "Task deleted successfully!";
+    log_audit($conn, $user_id, "Deleted task", $delete_id);
 }
 
 // ===========================================
-// FETCH EVENT DETAILS (for status control)
+// FETCH EVENT DETAILS (FOR STATUS / DESCRIPTION CONTROL)
 // ===========================================
 $currentEvent = null;
 if ($selectedEventId) {
     $stmt = $conn->prepare("
-        SELECT e.id, e.name, e.status
+        SELECT e.id, e.name, e.status, e.details
         FROM event e
         INNER JOIN organization o ON e.organization_id = o.id
         INNER JOIN member m ON m.organization_id = o.id
@@ -102,6 +97,24 @@ if ($selectedEventId) {
     $stmt->execute();
     $currentEvent = $stmt->get_result()->fetch_assoc();
     $stmt->close();
+}
+
+// ===========================================
+// FETCH ATTENDEE COUNT
+// ===========================================
+$attendeeCount = 0;
+
+if ($selectedEventId) {
+    $countStmt = $conn->prepare("
+        SELECT COUNT(*) AS total
+        FROM enrollment
+        WHERE event_id = ?
+    ");
+    $countStmt->bind_param("i", $selectedEventId);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result()->fetch_assoc();
+    $attendeeCount = $countResult['total'] ?? 0;
+    $countStmt->close();
 }
 
 // ===========================================
@@ -133,7 +146,6 @@ if ($selectedEventId) {
 
 $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,9 +153,29 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Planning Board - Symvan</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Sidebar styling */
+        .sidebar-right {
+            width: 280px;
+            background: #fff;
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.10);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+        .sidebar-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+    </style>
 </head>
+
 <body>
-<!-- ===================================
+ <!-- ===================================
      NAVIGATION BAR
      =================================== -->
 <nav class="navbar">
@@ -154,7 +186,7 @@ $conn->close();
 
         <!-- CENTER - Menu -->
         <ul class="navbar-center-menu">
-            <li><a href="index.php" >Home</a></li>
+            <li><a href="index.php">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
             <li><a href="enroll.php">Enroll</a></li>
             <li><a href="organization.php">Organizations</a></li>
@@ -174,125 +206,184 @@ $conn->close();
     </div>
 </nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1 class="page-title">Event Planning Board</h1>
-        <p class="page-subtitle">Select an event to plan its tasks and manage its posting status.</p>
+<div class="container" style="display:flex; gap:2rem;">
+    
+    <!-- LEFT SIDE (KANBAN + ADD TASK) -->
+    <div style="flex-grow:1;">
+
+        <div class="page-header">
+            <h1 class="page-title">Event Planning Board</h1>
+            <p class="page-subtitle">Plan and organize tasks for your events.</p>
+        </div>
+
+        <?php if ($successMessage): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($successMessage) ?></div>
+        <?php elseif ($errorMessage): ?>
+            <div class="alert alert-error"><?= htmlspecialchars($errorMessage) ?></div>
+        <?php endif; ?>
+
+        <!-- KANBAN BOARD -->
+        <a id="tasks"></a>
+        <?php if ($selectedEventId): ?>
+            <div class="kanban-board">
+                <?php foreach (["To Do", "In Progress", "Completed"] as $column): ?>
+                    <div class="kanban-column">
+                        <div class="kanban-header"><?= htmlspecialchars($column) ?></div>
+                        <div class="kanban-tasks">
+                            <?php if (empty($tasks[$column])): ?>
+                                <p class="text-grey text-center">No tasks yet.</p>
+                            <?php else: ?>
+                                <?php foreach ($tasks[$column] as $task): ?>
+                                    <div class="kanban-task">
+                                        <div class="kanban-task-title"><?= htmlspecialchars($task['title']) ?></div>
+                                        <div class="kanban-task-desc"><?= htmlspecialchars($task['description']) ?></div>
+
+                                        <!-- UPDATE STATUS -->
+                                        <form action="update_task.php?event_id=<?= $selectedEventId ?>#tasks" method="POST" class="mt-sm">
+                                            <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
+                                            <input type="hidden" name="event_id" value="<?= $selectedEventId ?>">
+                                            <select name="status" class="form-input" onchange="this.form.submit()">
+                                                <option value="To Do" <?= $task['status'] == 'To Do' ? 'selected' : '' ?>>To Do</option>
+                                                <option value="In Progress" <?= $task['status'] == 'In Progress' ? 'selected' : '' ?>>In Progress</option>
+                                                <option value="Completed" <?= $task['status'] == 'Completed' ? 'selected' : '' ?>>Completed</option>
+                                            </select>
+                                        </form>
+
+                                        <!-- DELETE TASK -->
+                                        <form action="planning.php?event_id=<?= $selectedEventId ?>#tasks" method="POST" class="mt-sm" 
+                                            onsubmit="return confirm('Delete this task?');">
+                                            <input type="hidden" name="delete_task_id" value="<?= $task['id'] ?>">
+                                            <button type="submit" class="btn btn-outline btn-block">Delete</button>
+                                        </form>
+
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- ADD TASK FORM -->
+            <div class="mt-lg">
+                <div class="card" style="max-width:600px; margin:0 auto;">
+                    <h3 class="mb-md text-red">Add Task</h3>
+                    <form action="planning.php?event_id=<?= $selectedEventId ?>#tasks" method="POST">
+                        <input type="hidden" name="event_id" value="<?= $selectedEventId ?>">
+
+                        <div class="form-group">
+                            <label class="form-label">Task Title *</label>
+                            <input type="text" name="task-title" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="task-desc" class="form-input">
+                        </div>
+
+                        <button class="btn btn-primary btn-block">Add Task</button>
+                    </form>
+                </div>
+            </div>
+
+        <?php else: ?>
+            <div class="card" style="text-align:center;background:#fff3cd;border:1px solid #ffeeba;">
+                Select an event from the sidebar to view its tasks.
+            </div>
+        <?php endif; ?>
+
     </div>
 
-    <!-- CHATBOT SHORTCUT BUTTON -->
-    <div style="text-align:center; margin-bottom:1.5rem;">
-     <a href="chatbot.php" class="btn btn-primary" style="padding:0.6rem 1.2rem;">
-          Open Event Chatbot
-      </a>
-    </div>
+    <!-- RIGHT SIDEBAR -->
+    <div class="sidebar-right">
 
-
-    <?php if ($successMessage): ?>
-        <div class="card" style="background:#d4edda; border:1px solid #28a745; color:#155724; text-align:center; margin-bottom:1rem;">
-            <?= htmlspecialchars($successMessage) ?>
-        </div>
-    <?php elseif ($errorMessage): ?>
-        <div class="card" style="background:#f8d7da; border:1px solid #dc3545; color:#721c24; text-align:center; margin-bottom:1rem;">
-            <?= htmlspecialchars($errorMessage) ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- EVENT SELECTION DROPDOWN -->
-    <form method="GET" action="planning.php" class="form-group" style="max-width:400px; margin:auto; margin-bottom:2rem;">
-        <label for="event_id" class="form-label">Choose an Event</label>
-        <select name="event_id" id="event_id" class="form-select" onchange="this.form.submit()">
-            <option value="">-- Select Event --</option>
-            <?php foreach ($events as $event): ?>
-                <option value="<?= $event['id'] ?>" <?= $selectedEventId == $event['id'] ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($event['name']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </form>
-
-    <!-- EVENT STATUS CONTROL -->
-    <?php if ($currentEvent): ?>
-        <div class="card" style="max-width:600px;margin:0 auto 2rem auto;text-align:center;">
-            <h3 class="mb-md text-red"><?= htmlspecialchars($currentEvent['name']) ?></h3>
-            <p><strong>Current Status:</strong>
-                <span style="color:<?= $currentEvent['status'] == 'Posted' ? 'green' : 'orange' ?>">
-                    <?= htmlspecialchars($currentEvent['status']) ?>
-                </span>
-            </p>
-            <form action="update_event_status.php" method="POST" style="margin-top:1rem;">
-                <input type="hidden" name="event_id" value="<?= $currentEvent['id'] ?>">
-                <select name="status" class="form-select" style="max-width:250px;margin:auto;">
-                    <option value="Posted" <?= $currentEvent['status'] == 'Posted' ? 'selected' : '' ?>>Posted</option>
-                    <option value="Draft" <?= $currentEvent['status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
+        <!-- EVENT SELECTION -->
+        <div class="sidebar-section">
+            <h3 class="text-red mb-sm">Select Event</h3>
+            <form method="GET" action="planning.php">
+                <select name="event_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Choose Event --</option>
+                    <?php foreach ($events as $event): ?>
+                        <option value="<?= $event['id'] ?>" <?= $selectedEventId == $event['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($event['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
-                <button type="submit" class="btn btn-primary mt-sm">Update Status</button>
             </form>
         </div>
-    <?php endif; ?>
 
-    <!-- KANBAN BOARD -->
-    <?php if ($selectedEventId): ?>
-        <div class="kanban-board">
-            <?php foreach (["To Do", "In Progress", "Completed"] as $column): ?>
-                <div class="kanban-column">
-                    <div class="kanban-header"><?= htmlspecialchars($column) ?></div>
-                    <div class="kanban-tasks">
-                        <?php if (empty($tasks[$column])): ?>
-                            <p class="text-grey text-center">No tasks yet.</p>
-                        <?php else: ?>
-                            <?php foreach ($tasks[$column] as $task): ?>
-                                <div class="kanban-task">
-                                    <div class="kanban-task-title"><?= htmlspecialchars($task['title']) ?></div>
-                                    <div class="kanban-task-desc"><?= htmlspecialchars($task['description']) ?></div>
+        <!-- EVENT STATUS CONTROL -->
+        <?php if ($currentEvent): ?>
+            <div class="sidebar-section">
+                <h3 class="text-red mb-sm">Status</h3>
+                <p><strong>Current:</strong>
+                    <span style="color:<?= $currentEvent['status'] == 'Posted' ? 'green' : 'orange' ?>">
+                        <?= htmlspecialchars($currentEvent['status']) ?>
+                    </span>
+                </p>
+                <p>
+                    <strong>Attendees:</strong>
+                        <span style="font-weight:600; color:#333;">
+                            <?= $attendeeCount ?>
+                        </span>
+                </p>
 
-                                    <!-- STATUS UPDATE FORM -->
-                                    <form action="update_task.php" method="POST" class="mt-sm">
-                                        <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
-                                        <input type="hidden" name="event_id" value="<?= $selectedEventId ?>">
-                                        <select name="status" class="form-input" onchange="this.form.submit()">
-                                            <option value="To Do" <?= $task['status'] == 'To Do' ? 'selected' : '' ?>>To Do</option>
-                                            <option value="In Progress" <?= $task['status'] == 'In Progress' ? 'selected' : '' ?>>In Progress</option>
-                                            <option value="Completed" <?= $task['status'] == 'Completed' ? 'selected' : '' ?>>Completed</option>
-                                        </select>
-                                    </form>
-
-                                    <!-- DELETE FORM -->
-                                    <form action="planning.php?event_id=<?= $selectedEventId ?>" method="POST" class="mt-sm" onsubmit="return confirm('Are you sure you want to delete this task?');">
-                                        <input type="hidden" name="delete_task_id" value="<?= $task['id'] ?>">
-                                        <button type="submit" class="btn btn-outline btn-block">Delete</button>
-                                    </form>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- ADD TASK FORM -->
-        <div class="mt-lg">
-            <div class="card" style="max-width:600px; margin:0 auto;">
-                <h3 class="mb-md text-red">Add Task for This Event</h3>
-                <form action="planning.php?event_id=<?= $selectedEventId ?>" method="POST">
-                    <input type="hidden" name="event_id" value="<?= $selectedEventId ?>">
-                    <div class="form-group">
-                        <label for="task-title" class="form-label">Task Title *</label>
-                        <input type="text" id="task-title" name="task-title" class="form-input" required placeholder="Enter task name">
-                    </div>
-                    <div class="form-group">
-                        <label for="task-desc" class="form-label">Description</label>
-                        <input type="text" id="task-desc" name="task-desc" class="form-input" placeholder="Brief description (optional)">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Add Task</button>
+                <form action="update_event_status.php" method="POST">
+                    <input type="hidden" name="event_id" value="<?= $currentEvent['id'] ?>">
+                    <select name="status" class="form-select mb-sm">
+                        <option value="Posted" <?= $currentEvent['status'] == 'Posted' ? 'selected' : '' ?>>Posted</option>
+                        <option value="Draft" <?= $currentEvent['status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
+                    </select>
+                    <button class="btn btn-primary btn-block">Update</button>
                 </form>
             </div>
+
+            <!-- EVENT DETAILS EDITOR -->
+            <div class="sidebar-section">
+                <h3 class="text-red mb-sm">Edit Event Description</h3>
+
+                <form action="update_event_description.php" method="POST">
+                    <input type="hidden" name="event_id" value="<?= $currentEvent['id'] ?>">
+
+                    <textarea 
+                        name="details" 
+                        class="form-textarea" 
+                        required 
+                        style="min-height:120px;"
+                    ><?= htmlspecialchars($currentEvent['details'] ?? '') ?></textarea>
+
+                    <button class="btn btn-primary btn-block mt-sm">Save Description</button>
+                </form>
+            </div>
+
+            <!-- DELETE EVENT -->
+            <div class="sidebar-section">
+                <h3 class="text-red mb-sm">Delete Event</h3>
+
+                <form 
+                    action="delete_event.php" 
+                    method="POST"
+                    onsubmit="return confirm('⚠️ Are you sure you want to delete this event? This cannot be undone.');"
+                >
+                    <input type="hidden" name="event_id" value="<?= $currentEvent['id'] ?>">
+
+                    <button class="btn btn-secondary btn-block" style="background:#A01729;">
+                        🗑️ Delete Event
+                    </button>
+                </form>
+            </div>
+        <?php endif; ?>
+
+        <!-- CHATBOT BUTTON -->
+        <div class="sidebar-section">
+            <a href="chatbot.php<?= $selectedEventId ? '?event_id='.$selectedEventId : '' ?>" 
+               class="btn btn-primary btn-block">
+                🤖 Open Chatbot
+            </a>
         </div>
-    <?php else: ?>
-        <div class="card" style="text-align:center; background-color:#fff3cd; border:1px solid #ffeeba; color:#856404;">
-            <p>⚠️ Select an event from the dropdown above to view or manage its tasks.</p>
-        </div>
-    <?php endif; ?>
+
+    </div>
+
 </div>
 </body>
 </html>

@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $userData['email'];
                 $_SESSION['username'] = $userData['username'];
 
-                // Update audit_log
                 log_audit($conn, $userData['id'], 'User logged in', $userData['id']);
 
                 header("Location: index.php");
@@ -131,4 +130,11 @@ $conn->close();
 </div>
 
 </body>
+
+<?php if (isset($_GET['deleted'])): ?>
+    <div class="alert alert-success" style="text-align:center;">
+        Your account has been deleted successfully.
+    </div>
+<?php endif; ?>
+
 </html>

@@ -1,6 +1,7 @@
-
 <?php
 session_start();
+
+require_once 'audit.php'; // Include audit function
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -11,19 +12,11 @@ require_once 'db_connect.php';
 
 $user_id = $_SESSION['user_id'];
 
-require_once 'audit.php'; // Include audit function
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $event_id = intval($_POST['event_id']);
-    $status   = $_POST['status'] ?? '';
 
-    // Validate status
-    if (!in_array($status, ['Posted', 'Draft'])) {
-        die("Invalid status value.");
-    }
-
-    // Ensure user is an admin of this event's organization
+    // Verify admin permissions
     $stmt = $conn->prepare("
         SELECT e.id
         FROM event e
@@ -38,19 +31,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     if (!$valid) {
-        die("Unauthorized: You are not allowed to update this event.");
+        die("Unauthorized: You cannot delete this event.");
     }
 
-    // Update status
-    $update = $conn->prepare("UPDATE event SET status = ? WHERE id = ?");
-    $update->bind_param("si", $status, $event_id);
+    // Delete tasks under this event
+    $delTasks = $conn->prepare("DELETE FROM task WHERE event_id = ?");
+    $delTasks->bind_param("i", $event_id);
+    $delTasks->execute();
+    $delTasks->close();
 
-    $update->execute();
-    $update->close();
+    // Delete the event itself
+    $delete = $conn->prepare("DELETE FROM event WHERE id = ?");
+    $delete->bind_param("i", $event_id);
+    $delete->execute();
+    $delete->close();
+
     // Log audit
-    log_audit($conn, $user_id, "Updated event status to '$status'", $event_id);
-    
-    header("Location: planning.php?event_id=" . $event_id);
+    log_audit($conn, $user_id, "Deleted event", $event_id);
+
+    header("Location: planning.php");
     exit();
 }
 ?>
