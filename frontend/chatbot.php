@@ -1,3 +1,72 @@
+
+<?php
+
+session_start();
+
+// Redirect if not logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require __DIR__ . '/vendor/autoload.php'; // <-- corrected path
+
+// load .env
+$dotenv = Dotenv\Dotenv::createImmutable('/var/www/');
+$dotenv->load();
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header("Content-Type: application/json");
+    header("Access-Control-Allow-Origin: *");
+
+    $apiKey = $_ENV['OPENAI_API_KEY'];
+    $input = json_decode(file_get_contents('php://input'), true);
+    $userPrompt = $input['prompt'] ?? '';
+
+    if (!$userPrompt) {
+        echo json_encode(['error' => 'No prompt provided']);
+        exit;
+    }
+
+    $data = [
+        "model" => "gpt-4o-mini",
+        "messages" => [
+            ["role" => "system", "content" => "You are Symvan, an event planning assistant."],
+            ["role" => "user", "content" => $userPrompt]
+        ],
+        "temperature" => 0.7
+    ];
+
+    $ch = curl_init("https://api.openai.com/v1/chat/completions");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json",
+            "Authorization: Bearer $apiKey"
+        ],
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($data)
+    ]);
+
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo json_encode(['error' => curl_error($ch)]);
+        exit;
+    }
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+    echo json_encode(['reply' => $result['choices'][0]['message']['content'] ?? 'No response from AI']);
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,38 +176,36 @@
     </style>
 </head>
 <body>
-    <!-- ===================================
-        NAVIGATION BAR
-        =================================== -->
-    <nav class="navbar">
-        <div class="navbar-container">
+   <!-- ===================================
+     NAVIGATION BAR
+     =================================== -->
+<nav class="navbar">
+    <div class="navbar-container">
 
-            <!-- LEFT - Brand -->
-            <a href="index.php" class="navbar-brand">Symvan</a>
+        <!-- LEFT - Brand -->
+        <a href="index.php" class="navbar-brand">Symvan</a>
 
-            <!-- CENTER - Menu -->
-            <ul class="navbar-center-menu">
-                <li><a href="index.php">Home</a></li>
-                <li><a href="myevents.php">My Events</a></li>
-                <li><a href="enroll.php">Enroll</a></li>
-                <li><a href="organization.php">Organizations</a></li>
-                <li><a href="create_event.php">Create Event</a></li>
-                <li><a href="planning.php" >Planning</a></li>
-                <li><a href="profile.php">Profile</a></li>
-            </ul>
+        <!-- CENTER - Menu -->
+        <ul class="navbar-center-menu">
+            <li><a href="index.php">Home</a></li>
+            <li><a href="myevents.php">My Events</a></li>
+            <li><a href="enroll.php">Browse Events</a></li>
+            <li><a href="organization.php">Organizations</a></li>
+            <li><a href="create_event.php">Create Event</a></li>
+            <li><a href="planning.php" >Planning</a></li>
+            <li><a href="profile.php">Profile</a></li>
+        </ul>
 
-            <!-- RIGHT - User session -->
-            <div class="navbar-right">
-                <?php if (isset($_SESSION['email'])): ?>
-                    <span class="navbar-email">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
-                    <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
-                <?php endif; ?>
-            </div>
-
+        <!-- RIGHT - User session -->
+        <div class="navbar-right">
+            <?php if (isset($_SESSION['email'])): ?>
+                <span class="navbar-email">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
+                <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
+            <?php endif; ?>
         </div>
-    </nav>
 
-
+    </div>
+</nav>
     <!-- ===================================
          CHATBOT PAGE
          =================================== -->
@@ -208,19 +275,49 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function fakeBotResponse(userText) {
-            setTimeout(() => {
-                appendMessage('bot', "Thanks for your message! In the future, I’ll connect to the Symvan AI planner and return personalized ideas for your event.");
-            }, 500);
+        async function sendToAI(userText) {
+            appendMessage('user', userText);
+
+            // Temporary "thinking" bubble
+            const thinking = document.createElement('div');
+            thinking.classList.add('chat-message', 'bot');
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble');
+            bubble.textContent = "🤔 Thinking...";
+            thinking.appendChild(bubble);
+            chatMessages.appendChild(thinking);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const res = await fetch("chatbot.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: userText })
+                });
+
+                const data = await res.json();
+                thinking.remove();
+
+                if (data.reply) {
+                    appendMessage('bot', data.reply);
+                } else {
+                    appendMessage('bot', "⚠️ No reply from AI.");
+                    console.error("No reply field in response:", data);
+                }
+            } catch (err) {
+                thinking.remove();
+                appendMessage('bot', "⚠️ Error connecting to AI server.");
+                console.error(err);
+            }
         }
 
         chatForm.addEventListener('submit', () => {
             const text = chatInput.value.trim();
             if (!text) return;
-            appendMessage('user', text);
             chatInput.value = '';
-            fakeBotResponse(text);
+            sendToAI(text);
         });
+
 
         quickButtons.forEach(btn => {
             btn.addEventListener('click', () => {
