@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once 'audit.php'; // Include audit function
 require_once 'db_connect.php';
 
 // Redirect if not logged in
@@ -64,11 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $successMessage = "✅ Event created successfully!";
-
-            $newEventId = $conn->insert_id;
-            // Add to audit_log
-            log_audit($conn, $user_id, 'Created new event', $newEventId);
-
         } else {
             $errorMessage = "❌ Failed to create event. Try again.";
         }
@@ -105,7 +99,7 @@ $conn->close();
         <ul class="navbar-center-menu">
             <li><a href="index.php" >Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
-            <li><a href="enroll.php">Enroll</a></li>
+            <li><a href="enroll.php">Browse Events</a></li>
             <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php" class="active">Create Event</a></li>
             <li><a href="planning.php" >Planning</a></li>

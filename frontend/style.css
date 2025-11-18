@@ -804,3 +804,22 @@ a:hover {
         font-size: 0.65rem;
     }
 }
+
+.sidebar-right {
+    width: 280px;
+    background: var(--white);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.sidebar-section {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--very-light-grey);
+}
+
+/*testing 11/17/2025*/

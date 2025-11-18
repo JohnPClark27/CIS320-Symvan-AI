@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once 'db_connect.php';
-require_once 'audit.php'; // Include audit function
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -20,10 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task_id'], $_POST['st
     $stmt = $conn->prepare("UPDATE task SET status = ? WHERE id = ? AND created_by = ?");
     $stmt->bind_param("sii", $status, $task_id, $user_id);
     $stmt->execute();
-
-    // Update audit_log
-    log_audit($conn, $user_id, 'Updated task status', $task_id);
-    
     $stmt->close();
 
     // Redirect back to the same event board

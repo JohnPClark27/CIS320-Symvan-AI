@@ -87,7 +87,7 @@ $conn->close();
         <ul class="navbar-center-menu">
             <li><a href="index.php" class="active">Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
-            <li><a href="enroll.php">Enroll</a></li>
+            <li><a href="enroll.php">Browse Events</a></li>
             <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php">Create Event</a></li>
             <li><a href="planning.php" >Planning</a></li>
@@ -179,7 +179,7 @@ $conn->close();
                 <a href="enroll.php" class="btn btn-primary" style="padding: var(--spacing-lg);">
                     Browse All Events
                 </a>
-                <a href="create_event.php" class="btn btn-outline" style="padding: var(--spacing-lg);">
+                <a href="create-event.php" class="btn btn-outline" style="padding: var(--spacing-lg);">
                     Create New Event
                 </a>
                 <a href="planning.php" class="btn btn-secondary" style="padding: var(--spacing-lg);">
