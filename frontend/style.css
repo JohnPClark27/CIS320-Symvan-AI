@@ -108,29 +108,35 @@ a:hover {
     z-index: 1000;
 }
 
+/* Entire nav container: 3 zones (left - center - right) */
 .navbar-container {
-    max-width: 1200px;
+   
     margin: 0 auto;
     padding: var(--spacing-sm) var(--spacing-md);
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
+/* ========== LEFT ========== */
 .navbar-brand {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--cardinal-red);
     text-decoration: none;
+    white-space: nowrap;
 }
 
-.navbar-menu {
-    display: flex;
+/* ========== CENTER MENU ========== */
+.navbar-center-menu {
     list-style: none;
+    display: flex;
     gap: var(--spacing-md);
+    flex: 1;                  /* Allows centering */
+    justify-content: center; /* Center the menu */
 }
 
-.navbar-menu li a {
+.navbar-center-menu li a {
     color: var(--dark-grey);
     font-weight: 500;
     padding: var(--spacing-xs) var(--spacing-sm);
@@ -138,15 +144,29 @@ a:hover {
     transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
-.navbar-menu li a:hover {
+.navbar-center-menu li a:hover {
     background-color: var(--very-light-grey);
     color: var(--cardinal-red);
 }
 
-.navbar-menu li a.active {
+.navbar-center-menu li a.active {
     background-color: var(--cardinal-red);
     color: var(--white);
 }
+
+/* ========== RIGHT SIDE ========== */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    white-space: nowrap;
+}
+
+.navbar-email {
+    font-weight: 500;
+    color: var(--dark-grey);
+}
+
 
 /* ===================================
    CONTAINER & LAYOUT

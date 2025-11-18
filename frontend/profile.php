@@ -113,23 +113,34 @@ $conn->close();
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- ===================================
+     NAVIGATION BAR
+     =================================== -->
 <nav class="navbar">
     <div class="navbar-container">
+
+        <!-- LEFT - Brand -->
         <a href="index.php" class="navbar-brand">Symvan</a>
-        <ul class="navbar-menu">
-            <li><a href="index.php">Home</a></li>
+
+        <!-- CENTER - Menu -->
+        <ul class="navbar-center-menu">
+            <li><a href="index.php" >Home</a></li>
             <li><a href="myevents.php">My Events</a></li>
             <li><a href="enroll.php">Enroll</a></li>
             <li><a href="organization.php">Organizations</a></li>
             <li><a href="create_event.php">Create Event</a></li>
+            <li><a href="planning.php" >Planning</a></li>
             <li><a href="profile.php" class="active">Profile</a></li>
         </ul>
-        <div class="user-session">
+
+        <!-- RIGHT - User session -->
+        <div class="navbar-right">
             <?php if (isset($_SESSION['email'])): ?>
-                <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
+                <span class="navbar-email">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
                 <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
             <?php endif; ?>
         </div>
+
     </div>
 </nav>
 
