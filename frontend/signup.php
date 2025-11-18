@@ -27,21 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Passwords do not match.";
     } else {
         // Check if email already exists
-        $checkEmail = $conn->prepare("SELECT id FROM user WHERE email = ?");
-        $checkEmail->bind_param("s", $email);
-        $checkEmail->execute();
-        $checkEmail->store_result();
+        $check = $conn->prepare("SELECT id FROM user WHERE email = ?");
+        $check->bind_param("s", $email);
+        $check->execute();
+        $check->store_result();
 
-        // Check if username already exists
-        $checkName = $conn->prepare("SELECT id FROM user WHERE username = ?");
-        $checkName->bind_param("s", $fullname);
-        $checkName->execute();
-        $checkName->store_result();
-
-        if ($checkEmail->num_rows > 0) {
+        if ($check->num_rows > 0) {
             $errorMessage = "An account with this email already exists.";
-        } else if ($checkName->num_rows > 0) {
-            $errorMessage = "An account with this username already exists.";
         } else {
             // Hash password securely
             $hashed = password_hash($password, PASSWORD_DEFAULT);
@@ -59,12 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $stmt->close();
-            
-    
         }
 
-        $checkEmail->close();
-        $checkName->close();
+        $check->close();
     }
 }
 
@@ -109,7 +98,7 @@ $conn->close();
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" required>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@university.edu" required>
                 </div>
 
                 <div class="form-group">
@@ -122,7 +111,12 @@ $conn->close();
                     <input type="password" id="confirm-password" name="confirm-password" class="form-input" placeholder="Re-enter your password" required>
                 </div>
 
-                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" class="form-checkbox" name="terms" required>
+                        I agree to the <a href="contact.php">Terms and Conditions</a>
+                    </label>
+                </div>
 
                 <button type="submit" class="btn btn-primary btn-block">
                     Create Account

@@ -183,14 +183,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
         
-    <!-- ===================================
-        NAVIGATION BAR
-        =================================== -->
+    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="index.php" class="navbar-brand">Symvan</a>
             <ul class="navbar-menu">
                 <li><a href="index.php">Home</a></li>
+                <li><a href="calendar.php">Calendar</a></li>
                 <li><a href="myevents.php">My Events</a></li>
                 <li><a href="enroll.php">Enroll</a></li>
                 <li><a href="organization.php">Organizations</a></li>
@@ -199,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </ul>
             <div class="user-session">
                 <?php if (isset($_SESSION['email'])): ?>
-                    <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
+                    <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']); ?></span>
                     <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
                 <?php endif; ?>
             </div>

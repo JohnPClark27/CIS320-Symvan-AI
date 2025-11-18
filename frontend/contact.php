@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About & Contact - Symvan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.php" class="navbar-brand">Symvan</a>
+            <ul class="navbar-menu">
+                <li><a href="index.php">Home</a></li>
+                <li><a href="calendar.php">Calendar</a></li>
+                <li><a href="myevents.php">My Events</a></li>
+                <li><a href="enroll.php">Enroll</a></li>
+                <li><a href="organization.php">Organizations</a></li>
+                <li><a href="create_event.php">Create Event</a></li>
+                <li><a href="profile.php">Profile</a></li>
+            </ul>
+            <div class="user-session">
+                <?php if (isset($_SESSION['email'])): ?>
+                    <span class="welcome-text">👋 <?= htmlspecialchars($_SESSION['email']); ?></span>
+                    <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- ===================================
+         ABOUT & CONTACT PAGE
+         Information about Symvan and contact form
+         =================================== -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">About Symvan</h1>
+            <p class="page-subtitle">Your campus event management solution</p>
+        </div>
+        
+        <!-- About Section -->
+        <div class="about-section">
+            <h2 class="text-red mb-md">What is Symvan?</h2>
+            <p>
+                Symvan is a comprehensive campus event management system designed to streamline 
+                the process of discovering, creating, and managing events on campus. Whether you're 
+                a student looking to attend workshops, a club organizer planning events, or an 
+                administrator overseeing campus activities, Symvan makes it easy.
+            </p>
+            
+            <h3 class="text-red mt-lg mb-md">Key Features</h3>
+            <div class="grid grid-2 mb-lg">
+                <div class="card">
+                    <h4 class="text-red">📅 Event Discovery</h4>
+                    <p>Browse and enroll in campus events with real-time availability updates.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">🗓️ Calendar View</h4>
+                    <p>Visualize all your enrolled events in an intuitive monthly calendar.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">✨ Event Creation</h4>
+                    <p>Easily create and manage your own events with comprehensive tools.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">📊 Planning Board</h4>
+                    <p>Track event tasks with a Kanban-style board to stay organized.</p>
+                </div>
+            </div>
+            
+            <h3 class="text-red mb-md">Our Mission</h3>
+            <p>
+                We believe that campus events are essential to the college experience. Symvan 
+                was created to foster community engagement, facilitate learning opportunities, 
+                and help students make the most of their time on campus. Our platform connects 
+                students with meaningful experiences and helps organizers reach their audience 
+                effectively.
+            </p>
+        </div>
+        
+        <!-- Contact Information -->
+        <section class="mt-lg">
+            <h2 class="text-center mb-lg">Get in Touch</h2>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <h4>Email Us</h4>
+                    <p class="text-grey">support@symvan.edu</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <h4>Call Us</h4>
+                    <p class="text-grey">(555) 123-4567</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <h4>Visit Us</h4>
+                    <p class="text-grey">Student Center, Room 200</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">🕐</div>
+                    <h4>Office Hours</h4>
+                    <p class="text-grey">Mon-Fri: 9 AM - 5 PM</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Form -->
+        <section class="mt-lg">
+            <div class="form-container">
+                <h2 class="text-center mb-md">Send Us a Message</h2>
+                
+                <form action="contact.html">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            class="form-input" 
+                            placeholder="John Doe"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact-email" class="form-label">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="contact-email" 
+                            class="form-input" 
+                            placeholder="your.email@university.edu"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject" class="form-label">Subject</label>
+                        <select id="subject" class="form-select" required>
+                            <option value="">Select a subject</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="technical">Technical Support</option>
+                            <option value="event">Event Question</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea 
+                            id="message" 
+                            class="form-textarea" 
+                            placeholder="How can we help you?"
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- FAQ Section -->
+        <section class="mt-lg">
+            <h2 class="text-center mb-lg">Frequently Asked Questions</h2>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4 class="text-red">How do I enroll in an event?</h4>
+                    <p>Navigate to the Enroll page, select the events you're interested in by checking the boxes, and click "Confirm Enrollment."</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">Can I create my own events?</h4>
+                    <p>Yes! Use the "Create Event" page to set up your own campus events. Fill out the form with all event details.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">How do I view my enrolled events?</h4>
+                    <p>Go to the "My Events" page to see a calendar view of all the events you've enrolled in.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">What is the Planning Board?</h4>
+                    <p>The Planning Board is a task management tool that helps you organize event-related tasks in To Do, In Progress, and Completed columns.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">How do I update my profile?</h4>
+                    <p>Visit the Profile page to edit your personal information, interests, and notification preferences.</p>
+                </div>
+                
+                <div class="card">
+                    <h4 class="text-red">Who can I contact for help?</h4>
+                    <p>You can reach us via email at support@symvan.edu or call us at (555) 123-4567 during office hours.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

@@ -10,8 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_id'])) {
     $user_id = $_SESSION['user_id'];
     $event_id = $_POST['event_id'];
 
-    require_once 'db_connect.php';
-    
+    $conn = new mysqli("localhost", "root", "", "symvan_db");
     if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
     $stmt = $conn->prepare("DELETE FROM enrollment WHERE user_id = ? AND event_id = ?");

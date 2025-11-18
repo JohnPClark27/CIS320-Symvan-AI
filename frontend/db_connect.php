@@ -1,19 +1,13 @@
 <?php
 // ===========================================
-// DATABASE CONNECTION (XAMPP)
+// DATABASE CONNECTION — shared across app
 // ===========================================
 
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "symvan_db";
 
-require __DIR__ . '/vendor/autoload.php'; // <-- corrected path
-
-// load .env
-$dotenv = Dotenv\Dotenv::createImmutable('/var/www/');
-$dotenv->load();
-
-$host = 'localhost';
-$user = $_ENV['db_user'];
-$pass = $_ENV['db_password'];
-$dbname = $_ENV['db_name'];
 $conn = new mysqli($host, $user, $pass, $dbname);
 
 if ($conn->connect_error) {
