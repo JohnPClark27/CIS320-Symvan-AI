@@ -51,36 +51,11 @@ $conn->close();
 </head>
 <body>
 
-<!-- ===================================
-     NAVIGATION BAR
-     =================================== -->
-<nav class="navbar">
-    <div class="navbar-container">
-
-        <!-- LEFT - Brand -->
-        <a href="index.php" class="navbar-brand">Symvan</a>
-
-        <!-- CENTER - Menu -->
-        <ul class="navbar-center-menu">
-            <li><a href="index.php" >Home</a></li>
-            <li><a href="myevents.php" class="active">My Events</a></li>
-            <li><a href="enroll.php">Browse Events</a></li>
-            <li><a href="organization.php">Organizations</a></li>
-            <li><a href="create_event.php">Create Event</a></li>
-            <li><a href="planning.php" >Planning</a></li>
-            <li><a href="profile.php">Profile</a></li>
-        </ul>
-
-        <!-- RIGHT - User session -->
-        <div class="navbar-right">
-            <?php if (isset($_SESSION['email'])): ?>
-                <span class="navbar-email">👋 <?= htmlspecialchars($_SESSION['email']) ?></span>
-                <a href="logout.php" class="btn btn-outline btn-sm">Logout</a>
-            <?php endif; ?>
-        </div>
-
-    </div>
-</nav>
+    <!-- ===================================
+         NAVIGATION BAR
+         =================================== -->
+    <?php $activePage = 'myevents'; ?>
+    <?php include 'components/navbar.php'; ?>
 
 <!-- ===========================================
      MAIN CONTENT
