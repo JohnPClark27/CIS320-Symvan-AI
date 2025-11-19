@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once 'audit.php';
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -43,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $delete->bind_param("i", $event_id);
     $delete->execute();
     $delete->close();
+
+    log_audit($conn, $user_id, "Deleted event ID $event_id", $event_id);
 
     header("Location: planning.php");
     exit();

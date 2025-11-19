@@ -4,6 +4,7 @@
 // ===========================================
 session_start();
 require_once 'db_connect.php';
+require_once 'audit.php';
 
 $user_id = $_SESSION["user_id"] ?? null;
 $successMessage = "";
@@ -25,6 +26,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         $stmt->close();
         $successMessage = "Successfully enrolled in selected events!";
+        foreach ($event_ids as $event_id) {
+            log_audit($conn, $user_id, "Enrolled in event ID $event_id", $event_id);
+        }
     } elseif (isset($_POST["unenroll_id"])) {
         // --- Unenroll from an event ---
         $unenroll_id = intval($_POST["unenroll_id"]);
@@ -33,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
         $stmt->close();
         $successMessage = "You have been unenrolled from the event.";
+        log_audit($conn, $user_id, "Unenrolled from event ID $unenroll_id", $unenroll_id);
     }
 }
 

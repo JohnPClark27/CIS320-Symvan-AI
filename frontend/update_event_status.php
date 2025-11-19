@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once 'db_connect.php';
+require_once 'audit.php';
 
 $user_id = $_SESSION['user_id'];
 
@@ -43,6 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update->bind_param("si", $status, $event_id);
     $update->execute();
     $update->close();
+
+    log_audit($conn, $user_id, "Updated event status for event ID $event_id to $status", $event_id);
 
     header("Location: planning.php?event_id=" . $event_id);
     exit();

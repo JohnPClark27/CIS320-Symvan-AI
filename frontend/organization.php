@@ -2,6 +2,8 @@
 session_start();
 require_once 'db_connect.php';
 
+require_once 'audit.php';
+
 // Redirect to login if user is not signed in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -40,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['organization_id'])) {
                 $insert->bind_param("ii", $user_id, $org_id);
                 $insert->execute();
                 $message = "✅ Joined as admin successfully!";
+                log_audit($conn, $user_id, "Joined organization ID $org_id as Admin", $org_id);
             } else {
                 $message = "❌ Incorrect admin password.";
             }
@@ -48,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['organization_id'])) {
             $insert->bind_param("ii", $user_id, $org_id);
             $insert->execute();
             $message = "✅ Joined as member successfully!";
+            log_audit($conn, $user_id, "Joined organization ID $org_id as Member", $org_id);
         }
     }
 }

@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once 'audit.php';
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -42,6 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update->bind_param("si", $details, $event_id);
     $update->execute();
     $update->close();
+
+    log_audit($conn, $user_id, "Updated event description for event ID $event_id", $event_id);
 
     header("Location: planning.php?event_id=" . $event_id);
     exit();

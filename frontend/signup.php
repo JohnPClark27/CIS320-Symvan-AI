@@ -4,6 +4,8 @@
 // ===========================================
 session_start();
 
+require_once 'audit.php';
+
 // ===========================================
 // DATABASE CONNECTION
 // ===========================================
@@ -46,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($stmt->execute()) {
                 $successMessage = "Account created successfully! You can now log in.";
+                log_audit($conn, $stmt->insert_id, "User account created", $stmt->insert_id);
             } else {
                 $errorMessage = "Something went wrong. Please try again.";
             }

@@ -3,3 +3,6 @@ venv/
 __pycache__/
 migrations/
 *.pyc
+vendor/
+composer.json
+composer.lock

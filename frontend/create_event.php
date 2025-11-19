@@ -2,6 +2,8 @@
 session_start();
 require_once 'db_connect.php';
 
+require_once 'audit.php';
+
 // Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -63,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $successMessage = "✅ Event created successfully!";
+            log_audit($conn, $user_id, "Created event '$name' for organization ID $organization_id", $organization_id);
         } else {
             $errorMessage = "❌ Failed to create event. Try again.";
         }

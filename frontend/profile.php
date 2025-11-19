@@ -142,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
 
     session_destroy();
 
+
     header("Location: login.php?deleted=1");
     exit();
 }

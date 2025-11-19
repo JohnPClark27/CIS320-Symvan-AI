@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'db_connect.php';
+require_once 'audit.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -20,6 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['task_id'], $_POST['st
     $stmt->bind_param("sii", $status, $task_id, $user_id);
     $stmt->execute();
     $stmt->close();
+
+    log_audit($conn, $user_id, "Updated task status for task ID $task_id to $status", $event_id);
 
     // Redirect back to the same event board
     header("Location: planning.php?event_id=" . $event_id);
