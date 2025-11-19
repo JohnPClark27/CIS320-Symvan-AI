@@ -14,13 +14,13 @@ Rather than using a variety of different sources to gather information about cam
 
 # Full Stack
 
-- Frontend: HTML, CSS, PHP
-- Backend: Python
+- Frontend: HTML, CSS
+- Backend: PHP
 - Database: mySQL
 - AI: OpenAI using a few shot method used to help enhance user experience
 
 # Setup
-Please follow the steps defined in the /SETUP.md file.
+Please follow the steps defined here: [SETUP](/SETUP.md).
 
 # Contribution Guidelines
 Feel free to contribute any bug reports, requests, or improvements!
