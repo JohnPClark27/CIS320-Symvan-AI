@@ -43,22 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
     $phone = trim($_POST['phone']);
     $major = trim($_POST['major']);
-    $year = trim($_POST['year']);
-    $graduation = $_POST['graduation'];
+    $year  = trim($_POST['year']);
+    $graduation_year = trim($_POST['graduation_year']);
     $interests = isset($_POST['interests']) ? implode(", ", $_POST['interests']) : "";
 
     $stmt = $conn->prepare("
-        INSERT INTO user_profile (user_id, phone, major, year, graduation_month, interests)
+        INSERT INTO user_profile (user_id, phone, major, year, graduation_year, interests)
         VALUES (?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             phone = VALUES(phone),
             major = VALUES(major),
             year = VALUES(year),
-            graduation_month = VALUES(graduation_month),
+            graduation_year = VALUES(graduation_year),
             interests = VALUES(interests)
     ");
 
-    $stmt->bind_param("isssss", $user_id, $phone, $major, $year, $graduation, $interests);
+    $stmt->bind_param("isssis", $user_id, $phone, $major, $year, $graduation_year, $interests);
     $stmt->execute();
     $stmt->close();
 
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
 
     // MEMBERSHIPS
     $stmt = $conn->prepare("DELETE FROM member WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_bind_param("i", $user_id);
     $stmt->execute();
     $stmt->close();
 
@@ -225,9 +225,9 @@ $conn->close();
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Graduation Month</label>
-                        <input type="month" name="graduation" class="form-input"
-                               value="<?= htmlspecialchars($profile['graduation_month'] ?? ''); ?>">
+                        <label class="form-label">Graduation Year</label>
+                        <input type="number" name="graduation_year" class="form-input" min="1900" max="2100"
+                            value="<?= htmlspecialchars($profile['graduation_year'] ?? ''); ?>">
                     </div>
                 </div>
 
@@ -276,47 +276,43 @@ $conn->close();
         </div>
 
         <!-- ===========================
-             DELETE ACCOUNT
+             DELETE ACCOUNT (DANGER ZONE)
         ============================ -->
-        <!-- ===========================
-     DELETE ACCOUNT (DANGER ZONE)
-=========================== -->
-    <div class="profile-section" 
-     style="
-        margin-top:2rem;
-        padding:1.5rem;
-        border:2px solid #cc0000;
-        background:#ffe6e6;
-        border-radius:10px;
-     ">
+        <div class="profile-section" 
+            style="
+                margin-top:2rem;
+                padding:1.5rem;
+                border:2px solid #cc0000;
+                background:#ffe6e6;
+                border-radius:10px;
+            ">
 
-    <h3 class="profile-section-title" 
-        style="color:#cc0000; font-weight:800; margin-bottom:0.5rem;">
-        ⚠️ Warning
-    </h3>
+            <h3 class="profile-section-title" 
+                style="color:#cc0000; font-weight:800; margin-bottom:0.5rem;">
+                ⚠️ Warning
+            </h3>
 
-    <p style="color:#660000; font-size:1rem; margin-bottom:1rem;">
-        Deleting your account is <strong>permanent</strong>. All of your profile data,  
-        memberships, enrollments, tasks, and login access will be erased forever.
-    </p>
+            <p style="color:#660000; font-size:1rem; margin-bottom:1rem;">
+                Deleting your account is <strong>permanent</strong>. All of your profile data,  
+                memberships, enrollments, tasks, and login access will be erased forever.
+            </p>
 
-    <form action="profile.php" method="POST"
-          onsubmit="return confirm('⚠️ Are you absolutely sure? This action cannot be undone.');">
+            <form action="profile.php" method="POST"
+                onsubmit="return confirm('⚠️ Are you absolutely sure? This action cannot be undone.');">
 
-        <button type="submit" name="delete_account"
-                class="btn btn-danger btn-block"
-                style="
-                    background:#cc0000;
-                    border:none;
-                    font-size:1.1rem;
-                    padding:0.75rem;
-                    font-weight:700;
-                ">
-            Delete My Account Permanently
-        </button>
-    </form>
-    </div>
-
+                <button type="submit" name="delete_account"
+                    class="btn btn-danger btn-block"
+                    style="
+                        background:#cc0000;
+                        border:none;
+                        font-size:1.1rem;
+                        padding:0.75rem;
+                        font-weight:700;
+                    ">
+                    Delete My Account Permanently
+                </button>
+            </form>
+        </div>
 
     </div>
 </div>
