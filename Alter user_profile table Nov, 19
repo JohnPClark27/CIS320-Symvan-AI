@@ -1,0 +1,9 @@
+Execute the following in xampp in the sql area, then click go to update the column name
+This is necessary for the new profile.php
+============================================================
+
+
+
+
+ALTER TABLE user_profile
+CHANGE COLUMN graduation_month graduation_year INT;
