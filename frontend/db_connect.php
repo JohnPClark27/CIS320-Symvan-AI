@@ -10,6 +10,7 @@ require __DIR__ . '/vendor/autoload.php'; // <-- corrected path
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__); // Use '/var/www/' on server
 $dotenv->load();
 
+
 $host = 'localhost';
 $user = $_ENV['db_user'];
 $pass = $_ENV['db_password'];
