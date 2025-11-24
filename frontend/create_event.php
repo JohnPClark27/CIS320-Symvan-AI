@@ -57,12 +57,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$isAdmin) {
         $errorMessage = "⚠️ You are not authorized to create events for that organization.";
     } elseif ($name && $details && $date && $start_time && $location) {
-        $stmt = $conn->prepare("
-            INSERT INTO event (name, details, date, start_time, end_time, location, organization_id, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        // Check if event name already exists for the organization on the same date
+        $checkStmt = $conn->prepare("
+            SELECT id FROM event 
+            WHERE name = ? AND organization_id = ? AND date = ?
+            LIMIT 1
         ");
-        $stmt->bind_param("ssssssis", $name, $details, $date, $start_time, $end_time, $location, $organization_id, $status);
+        $checkStmt->bind_param("sis", $name, $organization_id, $date);
+        $checkStmt->execute();
+        $checkStmt->store_result();
 
+        if ($checkStmt->num_rows > 0) {
+            $errorMessage = "⚠️ An event with that name already exists for the selected organization on that date.";
+        } else {
+            $stmt = $conn->prepare("
+                INSERT INTO event (name, details, date, start_time, end_time, location, organization_id, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->bind_param("ssssssis", $name, $details, $date, $start_time, $end_time, $location, $organization_id, $status);
+        }
+        $checkStmt->close();
+        
         if ($stmt->execute()) {
             $successMessage = "✅ Event created successfully!";
             log_audit($conn, $user_id, "Created event '$name' for organization ID $organization_id", $organization_id);
@@ -94,6 +109,7 @@ $conn->close();
          =================================== -->
     <?php $activePage = 'create_event'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 <!-- ===================================
      MAIN CONTENT

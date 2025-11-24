@@ -71,6 +71,8 @@ $conn->close();
     <title>Dashboard - Symvan</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
+
 <body>
 
 
@@ -79,6 +81,8 @@ $conn->close();
          =================================== -->
     <?php $activePage = 'index'; ?>
     <?php include 'components/navbar.php'; ?>
+
+    <?php include 'components/footer.php'; ?>
 
     <!-- ===================================
          DASHBOARD PAGE
@@ -146,21 +150,7 @@ $conn->close();
             </div>
         </section>
 
-        <!-- Quick Actions -->
-        <section class="mt-lg">
-            <h2 class="mb-md">Quick Actions</h2>
-            <div class="grid grid-3">
-                <a href="enroll.php" class="btn btn-primary" style="padding: var(--spacing-lg);">
-                    Browse All Events
-                </a>
-                <a href="create-event.php" class="btn btn-outline" style="padding: var(--spacing-lg);">
-                    Create New Event
-                </a>
-                <a href="planning.php" class="btn btn-secondary" style="padding: var(--spacing-lg);">
-                    Planning Board
-                </a>
-            </div>
-        </section>
+        
     </div>
 </body>
 </html>

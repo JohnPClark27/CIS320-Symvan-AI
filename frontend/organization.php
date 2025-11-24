@@ -97,6 +97,7 @@ if ($result && $result->num_rows > 0) {
          =================================== -->
     <?php $activePage = 'organization'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 <!-- ===================================
      PAGE CONTENT
@@ -135,7 +136,7 @@ if ($result && $result->num_rows > 0) {
                 </div>
                 <div class="card-footer">
                     <?php if ($isMember): ?>
-                        <p><strong>You are a <?= htmlspecialchars($isMember) ?></strong></p>
+                        <p><strong>Role: <?= htmlspecialchars($isMember) ?></strong></p>
                         <form method="POST">
                             <input type="hidden" name="leave_id" value="<?= $org['id'] ?>">
                             <button type="submit" class="btn btn-secondary btn-block">

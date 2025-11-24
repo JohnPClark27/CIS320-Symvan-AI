@@ -56,6 +56,7 @@ $conn->close();
          =================================== -->
     <?php $activePage = 'myevents'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 <!-- ===========================================
      MAIN CONTENT

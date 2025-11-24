@@ -49,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->execute()) {
                 $successMessage = "Account created successfully! You can now log in.";
                 log_audit($conn, $stmt->insert_id, "User account created", $stmt->insert_id);
+                header("Location: login.php");
+                exit();
             } else {
                 $errorMessage = "Something went wrong. Please try again.";
             }

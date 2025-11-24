@@ -183,6 +183,7 @@ $conn->close();
          =================================== -->
     <?php $activePage = 'planning'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 <div class="container" style="display:flex; gap:2rem;">
     

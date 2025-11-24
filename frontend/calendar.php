@@ -53,6 +53,7 @@ $sql = "
     LEFT JOIN organization o ON e.organization_id = o.id
     LEFT JOIN enrollment en ON en.event_id = e.id AND en.user_id = ?
     WHERE e.status = 'Posted'
+      AND e.date >= CURDATE()
       AND MONTH(e.date) = ?
       AND YEAR(e.date)  = ?
 ";
@@ -228,6 +229,7 @@ foreach ($eventsRaw as $event) {
          =================================== -->
     <?php $activePage = 'calendar'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 
 <!-- PAGE CONTENT -->

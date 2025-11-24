@@ -160,6 +160,7 @@ $conn->close();
          =================================== -->
     <?php $activePage = 'profile'; ?>
     <?php include 'components/navbar.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
 <div class="container">
     <div class="profile-container">
