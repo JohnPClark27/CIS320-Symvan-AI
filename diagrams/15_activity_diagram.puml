@@ -1,0 +1,234 @@
+@startuml Activity_Diagram
+
+title Symvan AI - Activity Diagram: Event Management Process
+
+|Student/Faculty|
+start
+:Access Symvan Platform;
+:Login with credentials;
+
+|System|
+:Validate credentials;
+:Create session;
+:Log login action;
+
+|Student/Faculty|
+:View dashboard;
+
+fork
+    :Browse events;
+    :View calendar;
+fork again
+    :View organizations;
+fork again
+    :View profile;
+end fork
+
+:Select "Browse Events";
+
+|System|
+:Query posted events
+from database;
+:Join with organization data;
+:Check user enrollments;
+
+|Student/Faculty|
+:View event list;
+:Select event to enroll;
+
+|System|
+:Verify event is Posted;
+
+if (Event is Posted?) then (yes)
+    if (Already enrolled?) then (yes)
+        |Student/Faculty|
+        :See "Enrolled" status;
+        stop
+    else (no)
+        |System|
+        :Create enrollment record;
+        :Update attendee count;
+        :Log enrollment action;
+        
+        |Student/Faculty|
+        :See success message;
+        
+        note right
+            Email/SMS notification
+            sent if enabled
+        end note
+    endif
+else (no)
+    |Student/Faculty|
+    :See error message;
+    stop
+endif
+
+|#LightBlue|Organization Admin|
+:Access organization page;
+
+fork
+    :View organization events;
+fork again
+    :Manage members;
+fork again
+    :View statistics;
+end fork
+
+:Create new event;
+
+|System|
+:Show event creation form;
+
+|Organization Admin|
+:Fill event details;
+:Submit form;
+
+|System|
+:Validate input;
+
+if (Validation passes?) then (yes)
+    if (Event name unique?) then (yes)
+        :Create event as Draft;
+        :Log event creation;
+        
+        |Organization Admin|
+        :See success message;
+        :Event visible to org members;
+        
+        :Review event details;
+        
+        if (Ready to publish?) then (yes)
+            :Update status to Posted;
+            
+            |System|
+            :Change event status;
+            :Log status change;
+            :Trigger notifications;
+            
+            note right
+                Event now visible
+                to all users
+            end note
+            
+            |Organization Admin|
+            :Event publicly visible;
+        else (no)
+            :Keep as draft;
+            :Edit later;
+        endif
+    else (no)
+        |Organization Admin|
+        :See error "Name exists";
+        stop
+    endif
+else (no)
+    |Organization Admin|
+    :See validation errors;
+    stop
+endif
+
+|Organization Admin|
+:Create task for event;
+
+|System|
+:Show task creation form;
+
+|Organization Admin|
+:Enter task details;
+:Link to event;
+:Submit;
+
+|System|
+:Create task with status "To Do";
+:Log task creation;
+
+|Organization Admin|
+:View task in planning page;
+
+repeat :Work on task;
+    :Update task status;
+    
+    |System|
+    :Update status in database;
+    :Log status change;
+    
+backward :Continue working;
+repeat while (Task completed?) is (no)
+    ->yes;
+
+|Organization Admin|
+:Mark task as Completed;
+
+|System|
+:Update final status;
+:Log completion;
+
+|Organization Admin|
+:Review event status;
+
+if (Event date passed?) then (yes)
+    |System|
+    :Event marked as completed;
+    :Generate attendance report;
+    
+    |Organization Admin|
+    :View event summary;
+    :See attendee list;
+else (no)
+    |Organization Admin|
+    :Monitor enrollments;
+    :Update event as needed;
+endif
+
+|Student/Faculty|
+:Receive event reminders;
+:Attend event;
+
+|System|
+:Log attendance (future feature);
+:Update statistics;
+
+stop
+
+note top of Student/Faculty
+    **Student/Faculty Actions:**
+    - Browse and enroll in events
+    - View calendar
+    - Manage profile
+    - Use AI chatbot
+    - View enrolled events
+end note
+
+note bottom of "Organization Admin"
+    **Organization Admin Actions:**
+    - Create events (Draft → Posted)
+    - Manage organization members
+    - Create and track tasks
+    - View event statistics
+    - Update event details
+end note
+
+note right of System
+    **System Responsibilities:**
+    - Authentication & authorization
+    - Data validation
+    - Database operations
+    - Audit logging
+    - Notifications
+    - Business rule enforcement
+end note
+
+legend right
+    |= Action |= Description |
+    | Rectangle | Activity/Action |
+    | Diamond | Decision point |
+    | Fork/Join | Parallel activities |
+    | Note | Additional information |
+    |= Swimlanes |= |
+    | Student/Faculty | End user actions |
+    | Organization Admin | Admin user actions |
+    | System | Automated processes |
+endlegend
+
+@enduml

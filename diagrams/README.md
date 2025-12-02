@@ -42,6 +42,8 @@ These diagrams provide detailed documentation for understanding the system archi
 | 11 | Detailed Database Schema | `11_database_schema_detailed.puml` | Schema | Complete database specification |
 | 12 | Data Flow Diagram | `12_data_flow_diagram.puml` | DFD | Data flow through system |
 | 13 | State Diagrams | `13_state_diagrams.puml` | State | Entity lifecycle states |
+| 14 | Deployment Diagram | `14_deployment_diagram.puml` | Deployment | Infrastructure and deployment |
+| 15 | Activity Diagram | `15_activity_diagram.puml` | Activity | Event management workflow |
 
 ---
 
@@ -454,6 +456,84 @@ For questions about these diagrams or the project architecture, please refer to 
 
 ---
 
+### 14. Deployment Diagram
+**File:** `14_deployment_diagram.puml`
+
+Infrastructure and deployment architecture:
+
+**Client Tier:**
+- Web browsers (desktop/mobile)
+- Session storage
+- JavaScript execution
+
+**Web Server Tier:**
+- Apache HTTP Server with SSL/TLS
+- PHP 8.3 runtime with FPM
+- Application files and components
+- Composer dependencies
+
+**Database Tier:**
+- MySQL 8.0 with InnoDB engine
+- Query optimizer and index manager
+- Transaction management
+- Security and access control
+
+**External Services:**
+- OpenAI API platform
+- SMTP email service
+- SMS gateway
+
+**File System:**
+- Configuration files (.env, php.ini, my.cnf)
+- Log files (Apache, PHP, MySQL, application)
+
+**Development Tools:**
+- Git version control
+- phpMyAdmin database management
+
+**Deployment Options:**
+- XAMPP (local development)
+- LAMP stack (production)
+- Cloud hosting (AWS/Azure/GCP)
+
+---
+
+### 15. Activity Diagram
+**File:** `15_activity_diagram.puml`
+
+Complete event management workflow with swimlanes:
+
+**Student/Faculty Activities:**
+- Login and authentication
+- Browse events and calendar
+- Enroll in events
+- View profile and preferences
+- Receive notifications
+
+**Organization Admin Activities:**
+- Create events (Draft → Posted)
+- Manage organization members
+- Create and track tasks
+- Update event details
+- View statistics
+
+**System Activities:**
+- Authentication and authorization
+- Data validation
+- Database operations
+- Audit logging
+- Notifications
+- Business rule enforcement
+
+**Key Workflows:**
+- Complete event lifecycle from creation to completion
+- Task management process
+- Enrollment validation and tracking
+- Parallel activity handling (fork/join)
+- Decision points and conditional flows
+
+---
+
 **Last Updated:** December 2025  
 **Diagram Format:** PlantUML (.puml)  
-**Total Diagrams:** 13
+**Total Diagrams:** 15
