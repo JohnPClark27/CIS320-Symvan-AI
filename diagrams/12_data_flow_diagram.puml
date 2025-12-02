@@ -1,0 +1,229 @@
+@startuml Data_Flow_Diagram
+
+title Symvan AI - Data Flow Diagram (Level 0 & Level 1)
+
+skinparam rectangle {
+    BackgroundColor LightYellow
+    BorderColor Black
+}
+
+skinparam storage {
+    BackgroundColor LightBlue
+    BorderColor Black
+}
+
+skinparam actor {
+    BackgroundColor LightGreen
+    BorderColor Black
+}
+
+' ===== EXTERNAL ENTITIES =====
+actor "Students/Faculty" as User
+actor "Organization Admins" as Admin
+actor "System Administrator" as SysAdmin
+actor "External APIs\n(OpenAI, Email, SMS)" as External
+
+' ===== LEVEL 0 - CONTEXT DIAGRAM =====
+rectangle "Symvan AI\nEvent Management System" as System {
+    
+    ' ===== LEVEL 1 - MAIN PROCESSES =====
+    
+    rectangle "1.0\nUser Management" as P1 {
+        rectangle "1.1\nRegistration" as P11
+        rectangle "1.2\nAuthentication" as P12
+        rectangle "1.3\nProfile Management" as P13
+    }
+    
+    rectangle "2.0\nEvent Management" as P2 {
+        rectangle "2.1\nCreate Event" as P21
+        rectangle "2.2\nBrowse Events" as P22
+        rectangle "2.3\nEnroll in Event" as P23
+        rectangle "2.4\nManage Events" as P24
+    }
+    
+    rectangle "3.0\nOrganization\nManagement" as P3 {
+        rectangle "3.1\nJoin Organization" as P31
+        rectangle "3.2\nManage Members" as P32
+        rectangle "3.3\nView Organizations" as P33
+    }
+    
+    rectangle "4.0\nTask Planning" as P4 {
+        rectangle "4.1\nCreate Task" as P41
+        rectangle "4.2\nUpdate Task Status" as P42
+        rectangle "4.3\nDelete Task" as P43
+    }
+    
+    rectangle "5.0\nNotification\nService" as P5 {
+        rectangle "5.1\nEmail Notifications" as P51
+        rectangle "5.2\nSMS Notifications" as P52
+        rectangle "5.3\nWeekly Digest" as P53
+    }
+    
+    rectangle "6.0\nAudit & Logging" as P6 {
+        rectangle "6.1\nLog Actions" as P61
+        rectangle "6.2\nView Audit Trail" as P62
+    }
+    
+    rectangle "7.0\nAI Assistant" as P7 {
+        rectangle "7.1\nChatbot Interface" as P71
+        rectangle "7.2\nEvent Recommendations" as P72
+    }
+}
+
+' ===== DATA STORES =====
+storage "D1: User Data" as D1
+storage "D2: Event Data" as D2
+storage "D3: Organization Data" as D3
+storage "D4: Enrollment Data" as D4
+storage "D5: Task Data" as D5
+storage "D6: Audit Log" as D6
+storage "D7: Profile Data" as D7
+
+' ===== DATA FLOWS - USER MANAGEMENT =====
+
+User --> P11 : Registration credentials
+P11 --> D1 : Store user account
+P11 --> D6 : Log registration
+
+User --> P12 : Login credentials
+P12 --> D1 : Validate credentials
+P12 --> D6 : Log login
+P12 --> User : Session token
+
+User --> P13 : Profile updates
+P13 --> D7 : Update profile
+P13 --> D6 : Log profile change
+
+' ===== DATA FLOWS - EVENT MANAGEMENT =====
+
+Admin --> P21 : Event details
+P21 --> D2 : Create draft event
+P21 --> D6 : Log event creation
+P21 --> Admin : Event ID
+
+User --> P22 : Browse request
+P22 --> D2 : Query posted events
+D3 --> P22 : Organization info
+P22 --> User : Events list
+
+User --> P23 : Enrollment request
+P23 --> D2 : Check event status
+P23 --> D4 : Create enrollment
+P23 --> D2 : Update attendees count
+P23 --> D6 : Log enrollment
+P23 --> User : Confirmation
+
+Admin --> P24 : Update event
+P24 --> D2 : Modify event
+P24 --> D6 : Log update
+P24 --> P5 : Trigger notifications
+
+' ===== DATA FLOWS - ORGANIZATION =====
+
+User --> P31 : Join request + password
+P31 --> D3 : Verify password
+P31 --> D3 : Create membership
+P31 --> D6 : Log membership
+
+Admin --> P32 : Member updates
+P32 --> D3 : Update permissions
+P32 --> D6 : Log permission change
+
+User --> P33 : View organizations
+P33 --> D3 : Query organizations
+D3 --> P33 : Members list
+P33 --> User : Organization details
+
+' ===== DATA FLOWS - TASK PLANNING =====
+
+Admin --> P41 : Task details
+P41 --> D5 : Create task
+P41 --> D6 : Log task creation
+
+Admin --> P42 : Status update
+P42 --> D5 : Update status
+P42 --> D6 : Log status change
+
+Admin --> P43 : Delete request
+P43 --> D5 : Remove task
+P43 --> D6 : Log deletion
+
+' ===== DATA FLOWS - NOTIFICATIONS =====
+
+P5 --> D7 : Read preferences
+P24 --> P5 : Event updates
+P21 --> P5 : New event notification
+P5 --> External : Send email
+P5 --> External : Send SMS
+P5 --> User : Notifications
+
+' ===== DATA FLOWS - AUDIT =====
+
+P11 --> P61 : Action data
+P12 --> P61 : Action data
+P21 --> P61 : Action data
+P23 --> P61 : Action data
+P31 --> P61 : Action data
+P61 --> D6 : Store audit record
+
+SysAdmin --> P62 : Audit query
+P62 --> D6 : Retrieve logs
+P62 --> SysAdmin : Audit report
+
+' ===== DATA FLOWS - AI ASSISTANT =====
+
+User --> P71 : Chat message
+P71 --> External : OpenAI API request
+External --> P71 : AI response
+P71 --> User : Chat response
+
+P72 --> D2 : Query events
+P72 --> D7 : Read user interests
+P72 --> External : AI recommendation request
+External --> P72 : Recommendations
+P72 --> User : Suggested events
+
+' ===== RELATIONSHIPS BETWEEN STORES =====
+
+D1 ..> D7 : One-to-one
+D1 ..> D3 : Many-to-many\n(via member)
+D1 ..> D4 : Many-to-many\n(via enrollment)
+D1 ..> D5 : One-to-many\n(created_by)
+D1 ..> D6 : One-to-many
+
+D3 ..> D2 : One-to-many
+D3 ..> D5 : One-to-many
+
+D2 ..> D4 : One-to-many
+D2 ..> D5 : One-to-many
+
+note right of D6
+  **Audit Log Store:**
+  Immutable records of all
+  critical system actions
+  for compliance and security
+end note
+
+note bottom of P5
+  **Notification Service:**
+  Respects user preferences
+  stored in profile data
+  Uses external services
+end note
+
+note top of P7
+  **AI Assistant:**
+  Powered by OpenAI
+  Few-shot learning approach
+  Context-aware responses
+end note
+
+note left of P2
+  **Event Workflow:**
+  1. Draft → Posted
+  2. Only posted events visible
+  3. Enrollment tracking
+  4. Attendee count auto-update
+end note
+
+@enduml

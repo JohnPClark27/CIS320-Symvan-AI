@@ -1,0 +1,263 @@
+@startuml Database_Schema_Detailed
+
+title Symvan AI - Detailed Database Schema Diagram
+
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b><color:red>PK</color> x</b>
+!define foreign_key(x) <color:blue>FK</color> <i>x</i>
+!define unique(x) <color:green>UQ</color> x
+!define not_null(x) x <color:red>*</color>
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor DarkBlue
+}
+
+' ===== USER TABLES =====
+
+class user << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  not_null(level: VARCHAR(20)) DEFAULT 'User'
+  unique(username: VARCHAR(80))
+  unique(email: VARCHAR(120))
+  not_null(password_hash: VARCHAR(128))
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (username)
+  UNIQUE KEY (email)
+}
+
+class user_profile << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  foreign_key(user_id: INT)
+  phone: VARCHAR(30)
+  major: VARCHAR(100)
+  year: VARCHAR(20)
+  graduation_year: INT
+  interests: TEXT
+  notify_email: BOOLEAN DEFAULT 1
+  notify_reminder: BOOLEAN DEFAULT 1
+  notify_weekly: BOOLEAN DEFAULT 1
+  notify_sms: BOOLEAN DEFAULT 0
+  notify_updates: BOOLEAN DEFAULT 1
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (user_id)
+  --
+  **Constraints:**
+  FK user_id → user(id)
+  ON DELETE CASCADE
+}
+
+' ===== ORGANIZATION TABLES =====
+
+class organization << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  unique(name: VARCHAR(120))
+  description: TEXT
+  password: VARCHAR(128)
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (name)
+}
+
+class member << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  foreign_key(user_id: INT)
+  foreign_key(organization_id: INT)
+  not_null(permission_level: VARCHAR(20)) DEFAULT 'Member'
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (user_id, organization_id)
+  KEY idx_member_user_id (user_id)
+  KEY idx_member_organization_id (organization_id)
+  --
+  **Constraints:**
+  FK user_id → user(id)
+  FK organization_id → organization(id)
+  ON DELETE CASCADE
+  --
+  **Valid permission_level values:**
+  'Member', 'Admin'
+}
+
+' ===== EVENT TABLES =====
+
+class event << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  unique(name: VARCHAR(120))
+  foreign_key(organization_id: INT)
+  details: TEXT
+  date: DATETIME
+  start_time: TIME
+  end_time: TIME
+  location: VARCHAR(200)
+  not_null(status: VARCHAR(20)) DEFAULT 'Draft'
+  not_null(attendees: INT) DEFAULT 0
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (name)
+  KEY idx_event_organization_id (organization_id)
+  --
+  **Constraints:**
+  FK organization_id → organization(id)
+  ON DELETE CASCADE
+  --
+  **Valid status values:**
+  'Draft', 'Posted'
+}
+
+class enrollment << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  foreign_key(user_id: INT)
+  foreign_key(event_id: INT)
+  enrolled_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  UNIQUE KEY (user_id, event_id)
+  KEY fk_enrollment_event (event_id)
+  --
+  **Constraints:**
+  FK user_id → user(id)
+  FK event_id → event(id)
+  ON DELETE CASCADE
+}
+
+' ===== TASK TABLES =====
+
+class task << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  not_null(title: VARCHAR(255))
+  description: TEXT
+  status: ENUM('To Do', 'In Progress', 'Completed') DEFAULT 'To Do'
+  foreign_key(created_by: INT)
+  foreign_key(organization_id: INT)
+  foreign_key(event_id: INT)
+  created_at: DATETIME DEFAULT CURRENT_TIMESTAMP
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  KEY fk_task_user (created_by)
+  KEY fk_task_organization (organization_id)
+  KEY fk_task_event (event_id)
+  --
+  **Constraints:**
+  FK created_by → user(id)
+  FK organization_id → organization(id)
+  FK event_id → event(id)
+  ON DELETE SET NULL / CASCADE
+}
+
+' ===== AUDIT TABLES =====
+
+class audit_log << (T,#FFAAAA) >> {
+  primary_key(id: INT AUTO_INCREMENT)
+  --
+  foreign_key(user_id: INT)
+  not_null(action_description: VARCHAR(255))
+  affected_id: INT
+  created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  --
+  **Indexes:**
+  PRIMARY KEY (id)
+  KEY fk_auditlog_user (user_id)
+  --
+  **Constraints:**
+  FK user_id → user(id)
+  ON DELETE CASCADE ON UPDATE CASCADE
+}
+
+' ===== RELATIONSHIPS =====
+
+user "1" -- "0..1" user_profile : has
+user "1" -- "0..*" member : joins as
+user "1" -- "0..*" enrollment : enrolls in
+user "1" -- "0..*" task : creates
+user "1" -- "0..*" audit_log : actions logged
+
+organization "1" -- "0..*" member : has
+organization "1" -- "0..*" event : organizes
+organization "1" -- "0..*" task : owns
+
+event "1" -- "0..*" enrollment : receives
+event "1" -- "0..*" task : has planning
+
+member "*" -- "1" organization
+member "*" -- "1" user
+
+enrollment "*" -- "1" user
+enrollment "*" -- "1" event
+
+task "*" -- "1" user
+task "*" -- "0..1" organization
+task "*" -- "0..1" event
+
+audit_log "*" -- "1" user
+
+note top of user
+  **Authentication:**
+  - Password stored as bcrypt hash
+  - Level determines system privileges
+  - Username and email must be unique
+end note
+
+note top of organization
+  **Access Control:**
+  - Password-protected membership
+  - Organizations can have multiple admins
+  - Cascade delete removes all related data
+end note
+
+note top of event
+  **Event Lifecycle:**
+  1. Created as "Draft" (visible to org members)
+  2. Promoted to "Posted" (visible to all)
+  - Unique event names prevent duplicates
+  - Attendees count auto-updated
+end note
+
+note top of enrollment
+  **Enrollment Rules:**
+  - One enrollment per user per event
+  - Automatically updates event.attendees
+  - Cascade delete when event/user removed
+end note
+
+note top of task
+  **Task Management:**
+  - Can be linked to events or organizations
+  - Three status levels for workflow
+  - Creator tracked via created_by
+end note
+
+note top of audit_log
+  **Audit Trail:**
+  - All critical actions logged
+  - Immutable once created
+  - Used for compliance and debugging
+  - affected_id references related entity
+end note
+
+note bottom of user_profile
+  **Notification Preferences:**
+  - Multiple notification channels
+  - Controls email, SMS, reminders
+  - Weekly digest option
+  - Update notifications toggle
+end note
+
+@enduml

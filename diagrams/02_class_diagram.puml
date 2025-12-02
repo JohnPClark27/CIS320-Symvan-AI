@@ -1,0 +1,208 @@
+@startuml Symvan_AI_Class_Diagram
+
+title Symvan AI - UML Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+class User {
+  - id: int
+  - level: string
+  - username: string
+  - email: string
+  - password_hash: string
+  --
+  + register(): bool
+  + login(username: string, password: string): bool
+  + logout(): void
+  + updatePassword(newPassword: string): bool
+  + getProfile(): UserProfile
+  + getEnrollments(): Enrollment[]
+  + getCreatedTasks(): Task[]
+}
+
+class UserProfile {
+  - id: int
+  - user_id: int
+  - phone: string
+  - major: string
+  - year: string
+  - graduation_year: int
+  - interests: text
+  - notify_email: bool
+  - notify_reminder: bool
+  - notify_weekly: bool
+  - notify_sms: bool
+  - notify_updates: bool
+  --
+  + updateProfile(data: array): bool
+  + getNotificationPreferences(): array
+  + setNotificationPreferences(prefs: array): bool
+}
+
+class Organization {
+  - id: int
+  - name: string
+  - description: text
+  - password: string
+  --
+  + createOrganization(data: array): bool
+  + updateOrganization(data: array): bool
+  + getMembers(): Member[]
+  + getEvents(): Event[]
+  + addMember(userId: int, level: string): bool
+  + removeMember(userId: int): bool
+  + verifyPassword(password: string): bool
+}
+
+class Member {
+  - id: int
+  - user_id: int
+  - organization_id: int
+  - permission_level: string
+  --
+  + updatePermissionLevel(level: string): bool
+  + getOrganization(): Organization
+  + getUser(): User
+  + hasPermission(action: string): bool
+}
+
+class Event {
+  - id: int
+  - name: string
+  - organization_id: int
+  - details: text
+  - date: datetime
+  - start_time: time
+  - end_time: time
+  - location: string
+  - status: string
+  - attendees: int
+  --
+  + createEvent(data: array): bool
+  + updateEvent(data: array): bool
+  + deleteEvent(): bool
+  + updateStatus(status: string): bool
+  + updateDescription(description: string): bool
+  + getEnrollments(): Enrollment[]
+  + getTasks(): Task[]
+  + getOrganization(): Organization
+  + countAttendees(): int
+}
+
+class Enrollment {
+  - id: int
+  - user_id: int
+  - event_id: int
+  - enrolled_at: datetime
+  --
+  + enroll(userId: int, eventId: int): bool
+  + cancelEnrollment(): bool
+  + getUser(): User
+  + getEvent(): Event
+}
+
+class Task {
+  - id: int
+  - title: string
+  - description: text
+  - status: enum
+  - created_by: int
+  - organization_id: int
+  - event_id: int
+  - created_at: datetime
+  --
+  + createTask(data: array): bool
+  + updateTask(data: array): bool
+  + deleteTask(): bool
+  + updateStatus(status: string): bool
+  + getCreator(): User
+  + getEvent(): Event
+  + getOrganization(): Organization
+}
+
+class AuditLog {
+  - id: int
+  - user_id: int
+  - action_description: string
+  - affected_id: int
+  - created_at: timestamp
+  --
+  + logAction(userId: int, action: string, affectedId: int): bool
+  + getLogsByUser(userId: int): AuditLog[]
+  + getLogsByAction(action: string): AuditLog[]
+  + getRecentLogs(limit: int): AuditLog[]
+}
+
+class DatabaseConnection {
+  - host: string
+  - user: string
+  - password: string
+  - dbname: string
+  - conn: mysqli
+  --
+  + connect(): mysqli
+  + disconnect(): void
+  + query(sql: string): result
+  + prepareStatement(sql: string): statement
+}
+
+' ===== RELATIONSHIPS =====
+
+User "1" -- "0..1" UserProfile : has
+User "1" -- "0..*" Member : participates
+User "1" -- "0..*" Enrollment : enrolls
+User "1" -- "0..*" Task : creates
+User "1" -- "0..*" AuditLog : generates
+
+Organization "1" -- "0..*" Member : contains
+Organization "1" -- "0..*" Event : organizes
+Organization "1" -- "0..*" Task : owns
+
+Event "1" -- "0..*" Enrollment : has
+Event "1" -- "0..*" Task : has
+
+Member "0..*" -- "1" Organization : belongs to
+Member "0..*" -- "1" User : represents
+
+Enrollment "0..*" -- "1" User : by
+Enrollment "0..*" -- "1" Event : for
+
+Task "0..*" -- "1" User : created by
+Task "0..*" -- "0..1" Organization : belongs to
+Task "0..*" -- "0..1" Event : associated with
+
+AuditLog "0..*" -- "1" User : logs action of
+
+' Database Connection is used by all
+DatabaseConnection .. User : uses
+DatabaseConnection .. Organization : uses
+DatabaseConnection .. Event : uses
+DatabaseConnection .. Task : uses
+DatabaseConnection .. AuditLog : uses
+
+note right of User
+  Central entity for authentication
+  and authorization
+end note
+
+note right of Event
+  Status can be: Draft, Posted
+  Tracks attendee count
+end note
+
+note right of Task
+  Status: To Do, In Progress, Completed
+  Can be linked to events or organizations
+end note
+
+note right of Member
+  Permission levels: Member, Admin
+  Links users to organizations
+end note
+
+@enduml

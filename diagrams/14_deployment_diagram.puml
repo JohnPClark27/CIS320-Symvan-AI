@@ -1,0 +1,283 @@
+@startuml Deployment_Diagram
+
+title Symvan AI - Deployment Diagram
+
+!include <C4/C4_Container>
+
+skinparam node {
+    BackgroundColor LightBlue
+    BorderColor Black
+}
+
+skinparam component {
+    BackgroundColor LightYellow
+    BorderColor Black
+}
+
+skinparam database {
+    BackgroundColor LightGreen
+    BorderColor Black
+}
+
+' ===== CLIENT DEVICES =====
+node "Client Device" as ClientDevice {
+    component "Web Browser" as Browser {
+        [HTML/CSS\nRenderer] as HTMLRenderer
+        [JavaScript\nEngine] as JSEngine
+        [Session\nStorage] as SessionStorage
+    }
+}
+
+' ===== WEB SERVER =====
+node "Web Server\n(Apache/XAMPP)" as WebServer {
+    
+    component "Apache HTTP Server" as Apache {
+        [Virtual Host\nConfiguration] as VHost
+        [.htaccess\nRules] as HTAccess
+        [SSL/TLS\nCertificate] as SSL
+    }
+    
+    component "PHP Runtime 8.3" as PHPRuntime {
+        [PHP-FPM\nProcess Manager] as PHPFPM
+        [Session Handler] as PHPSession
+        [Error Handler] as ErrorHandler
+    }
+    
+    component "Application Files" as AppFiles {
+        folder "Frontend PHP" {
+            [Page Controllers] as Pages
+            [API Endpoints] as APIs
+        }
+        folder "Components" {
+            [Shared Components] as Shared
+            [DB Connection] as DBConn
+        }
+        folder "Assets" {
+            [CSS Files] as CSS
+            [JavaScript Files] as JS
+        }
+    }
+    
+    component "Composer Dependencies" as Composer {
+        [vlucas/phpdotenv] as DotEnv
+        [Other Packages] as Packages
+    }
+}
+
+' ===== DATABASE SERVER =====
+node "Database Server\n(MySQL 8.0)" as DBServer {
+    
+    database "MySQL Instance" as MySQL {
+        component "symvan_db\nDatabase" as SymvanDB {
+            [user] as UserTable
+            [user_profile] as ProfileTable
+            [organization] as OrgTable
+            [member] as MemberTable
+            [event] as EventTable
+            [enrollment] as EnrollTable
+            [task] as TaskTable
+            [audit_log] as AuditTable
+        }
+        
+        component "Database Engine" as DBEngine {
+            [InnoDB\nStorage Engine] as InnoDB
+            [Query Optimizer] as QueryOpt
+            [Index Manager] as IndexMgr
+            [Transaction Manager] as TransMgr
+        }
+        
+        component "Security" as DBSecurity {
+            [User Authentication] as DBAuth
+            [Access Control] as DBAccess
+            [Encryption at Rest] as DBEncrypt
+        }
+    }
+}
+
+' ===== EXTERNAL SERVICES =====
+cloud "External Services" as Cloud {
+    
+    node "OpenAI Platform" as OpenAI {
+        [OpenAI API\nGPT Models] as OpenAIAPI
+        [API Gateway] as OpenAIGateway
+    }
+    
+    node "Email Service" as EmailService {
+        [SMTP Server] as SMTP
+        [Email Queue] as EmailQueue
+    }
+    
+    node "SMS Gateway" as SMSGateway {
+        [SMS API] as SMSAPI
+        [Message Queue] as SMSQueue
+    }
+}
+
+' ===== FILE SYSTEM =====
+node "File System" as FileSystem {
+    folder "Configuration" {
+        [.env\nEnvironment Variables] as EnvFile
+        [php.ini\nPHP Configuration] as PHPIni
+        [my.cnf\nMySQL Configuration] as MySQLConf
+    }
+    
+    folder "Logs" {
+        [Apache Error Logs] as ApacheLogs
+        [PHP Error Logs] as PHPLogs
+        [MySQL Logs] as MySQLLogs
+        [Application Logs] as AppLogs
+    }
+}
+
+' ===== DEVELOPMENT TOOLS =====
+node "Development Environment\n(Optional)" as DevEnv {
+    component "Version Control" {
+        [Git Repository] as Git
+        [GitHub Remote] as GitHub
+    }
+    
+    component "Development Tools" {
+        [phpMyAdmin] as phpMyAdmin
+        [Database Management] as DBMgmt
+    }
+}
+
+' ===== DEPLOYMENT RELATIONSHIPS =====
+
+' Client to Server
+ClientDevice --> WebServer : HTTPS/HTTP\nPort 443/80
+Browser --> HTMLRenderer : Renders
+Browser --> JSEngine : Executes
+Browser --> SessionStorage : Stores
+
+' Apache Processing
+WebServer ..> Apache : Hosts
+Apache --> VHost : Routes
+Apache --> SSL : Encrypts
+Apache --> PHPRuntime : Forwards PHP requests
+
+' PHP Processing
+PHPRuntime --> PHPFPM : Manages
+PHPRuntime --> PHPSession : Maintains
+PHPRuntime --> AppFiles : Executes
+
+' Application Flow
+Pages --> DBConn : Uses
+APIs --> DBConn : Uses
+Shared --> DBConn : Uses
+DBConn --> DotEnv : Reads config
+
+' Database Connection
+WebServer --> DBServer : TCP/IP\nPort 3306\nMySQL Protocol
+DBConn --> MySQL : MySQLi\nConnection
+MySQL --> SymvanDB : Queries
+SymvanDB --> InnoDB : Storage
+MySQL --> DBSecurity : Authenticates
+
+' External Services
+WebServer --> OpenAI : HTTPS\nREST API
+AppFiles --> OpenAIAPI : API Calls
+WebServer --> EmailService : SMTP\nPort 587/465
+WebServer --> SMSGateway : HTTPS\nREST API
+
+' File System
+WebServer ..> FileSystem : Reads/Writes
+DBServer ..> FileSystem : Logs
+AppFiles --> EnvFile : Reads
+PHPRuntime --> PHPIni : Configured by
+MySQL --> MySQLConf : Configured by
+
+' Development
+DevEnv ..> WebServer : Deploys to
+Git --> GitHub : Push/Pull
+phpMyAdmin --> DBServer : Manages
+
+' ===== NETWORK BOUNDARIES =====
+package "Production Network\n(Internal)" {
+    WebServer
+    DBServer
+    FileSystem
+}
+
+package "External Network\n(Internet)" {
+    ClientDevice
+    Cloud
+}
+
+package "Development Network\n(Local/Staging)" {
+    DevEnv
+}
+
+' ===== NOTES =====
+
+note right of WebServer
+  **Web Server Configuration:**
+  - Apache 2.4+ with mod_php or PHP-FPM
+  - PHP 8.3+ with required extensions:
+    * mysqli
+    * session
+    * openssl
+  - Document root: /var/www/ or htdocs/
+  - Virtual host for domain routing
+end note
+
+note right of DBServer
+  **Database Server Configuration:**
+  - MySQL 8.0+ with InnoDB
+  - Character set: utf8mb4
+  - Collation: utf8mb4_unicode_ci
+  - Max connections: 151 (default)
+  - Query cache enabled
+  - Binary logging for replication
+end note
+
+note left of Cloud
+  **External Dependencies:**
+  - OpenAI API key required
+  - SMTP credentials for email
+  - SMS gateway account
+  - API rate limits apply
+  - Network latency considerations
+end note
+
+note bottom of FileSystem
+  **Security Considerations:**
+  - .env file not in web root
+  - Database credentials secured
+  - File permissions properly set
+  - Logs rotated regularly
+  - Backups automated
+end note
+
+note top of ClientDevice
+  **Client Requirements:**
+  - Modern web browser (Chrome, Firefox, Safari, Edge)
+  - JavaScript enabled
+  - Cookies enabled for sessions
+  - HTTPS support (recommended)
+  - Responsive design (mobile/tablet/desktop)
+end note
+
+' ===== DEPLOYMENT SCENARIOS =====
+
+note bottom of WebServer
+  **Deployment Options:**
+  
+  **Option 1: XAMPP (Development)**
+  - Local development environment
+  - All services on single machine
+  - Easy setup and configuration
+  
+  **Option 2: LAMP Stack (Production)**
+  - Linux + Apache + MySQL + PHP
+  - Separate web and database servers
+  - Enhanced security and scalability
+  
+  **Option 3: Cloud Hosting**
+  - AWS/Azure/GCP deployment
+  - Load balancing for web tier
+  - Managed MySQL (RDS/Cloud SQL)
+  - Auto-scaling capabilities
+end note
+
+@enduml

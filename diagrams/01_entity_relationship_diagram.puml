@@ -1,0 +1,141 @@
+@startuml Symvan_AI_ERD
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define primary_key(x) <b>PK: x</b>
+!define foreign_key(x) <i>FK: x</i>
+!define column(x) x
+
+title Symvan AI - Entity Relationship Diagram
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' ===== ENTITIES =====
+
+entity User {
+  primary_key(id: INT)
+  --
+  column(level: VARCHAR(20))
+  column(username: VARCHAR(80))
+  column(email: VARCHAR(120))
+  column(password_hash: VARCHAR(128))
+}
+
+entity UserProfile {
+  primary_key(id: INT)
+  --
+  foreign_key(user_id: INT)
+  column(phone: VARCHAR(30))
+  column(major: VARCHAR(100))
+  column(year: VARCHAR(20))
+  column(graduation_year: INT)
+  column(interests: TEXT)
+  column(notify_email: BOOLEAN)
+  column(notify_reminder: BOOLEAN)
+  column(notify_weekly: BOOLEAN)
+  column(notify_sms: BOOLEAN)
+  column(notify_updates: BOOLEAN)
+}
+
+entity Organization {
+  primary_key(id: INT)
+  --
+  column(name: VARCHAR(120))
+  column(description: TEXT)
+  column(password: VARCHAR(128))
+}
+
+entity Member {
+  primary_key(id: INT)
+  --
+  foreign_key(user_id: INT)
+  foreign_key(organization_id: INT)
+  column(permission_level: VARCHAR(20))
+}
+
+entity Event {
+  primary_key(id: INT)
+  --
+  column(name: VARCHAR(120))
+  foreign_key(organization_id: INT)
+  column(details: TEXT)
+  column(date: DATETIME)
+  column(start_time: TIME)
+  column(end_time: TIME)
+  column(location: VARCHAR(200))
+  column(status: VARCHAR(20))
+  column(attendees: INT)
+}
+
+entity Enrollment {
+  primary_key(id: INT)
+  --
+  foreign_key(user_id: INT)
+  foreign_key(event_id: INT)
+  column(enrolled_at: DATETIME)
+}
+
+entity Task {
+  primary_key(id: INT)
+  --
+  column(title: VARCHAR(255))
+  column(description: TEXT)
+  column(status: ENUM)
+  foreign_key(created_by: INT)
+  foreign_key(organization_id: INT)
+  foreign_key(event_id: INT)
+  column(created_at: DATETIME)
+}
+
+entity AuditLog {
+  primary_key(id: INT)
+  --
+  foreign_key(user_id: INT)
+  column(action_description: VARCHAR(255))
+  column(affected_id: INT)
+  column(created_at: TIMESTAMP)
+}
+
+' ===== RELATIONSHIPS =====
+
+User ||--o{ UserProfile : "has one"
+User ||--o{ Member : "has many"
+User ||--o{ Enrollment : "enrolls in"
+User ||--o{ Task : "creates"
+User ||--o{ AuditLog : "generates"
+
+Organization ||--o{ Member : "has many"
+Organization ||--o{ Event : "organizes"
+Organization ||--o{ Task : "owns"
+
+Event ||--o{ Enrollment : "has many"
+Event ||--o{ Task : "has tasks"
+
+note right of User
+  Core entity representing
+  system users (students/faculty)
+end note
+
+note right of Organization
+  Represents campus
+  organizations/clubs
+end note
+
+note right of Event
+  Campus events organized
+  by organizations
+end note
+
+note right of Task
+  To-do items for event planning
+  Status: To Do, In Progress, Completed
+end note
+
+note right of AuditLog
+  Tracks all user actions
+  for compliance and security
+end note
+
+@enduml

@@ -1,0 +1,173 @@
+@startuml Symvan_AI_Architecture
+
+title Symvan AI - System Architecture Diagram
+
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam database {
+    BackgroundColor LightBlue
+    BorderColor Black
+}
+
+skinparam node {
+    BackgroundColor LightGreen
+    BorderColor Black
+}
+
+' ===== ACTORS =====
+actor "Student/Faculty" as User
+actor "Organization Admin" as Admin
+
+' ===== PRESENTATION LAYER =====
+package "Presentation Layer" {
+    rectangle "Web Browser" as Browser {
+        component "HTML/CSS UI" as UI
+        component "JavaScript" as JS
+    }
+}
+
+' ===== APPLICATION LAYER =====
+package "Application Layer (PHP)" {
+    rectangle "Frontend PHP Scripts" as Frontend {
+        component "index.php\n(Dashboard)" as Index
+        component "login.php\n(Authentication)" as Login
+        component "calendar.php\n(Event Calendar)" as Calendar
+        component "enroll.php\n(Event Browse)" as Enroll
+        component "myevents.php\n(User Events)" as MyEvents
+        component "create_event.php\n(Event Creation)" as CreateEvent
+        component "organization.php\n(Organizations)" as Org
+        component "planning.php\n(Task Planning)" as Planning
+        component "profile.php\n(User Profile)" as Profile
+        component "chatbot.php\n(AI Assistant)" as Chatbot
+    }
+    
+    rectangle "API Endpoints" as API {
+        component "enroll.php\n(Enrollment)" as EnrollAPI
+        component "cancel_enrollment.php" as CancelAPI
+        component "update_event_status.php" as EventStatusAPI
+        component "update_event_description.php" as EventDescAPI
+        component "update_task.php" as TaskAPI
+        component "delete_event.php" as DeleteAPI
+    }
+    
+    rectangle "Core Components" as Core {
+        component "db_connect.php\n(Database Layer)" as DB
+        component "navbar.php\n(Navigation)" as Nav
+        component "footer.php\n(Footer)" as Footer
+        component "Session Management" as Session
+        component "Authentication" as Auth
+    }
+}
+
+' ===== DATABASE LAYER =====
+database "MySQL Database" as MySQL {
+    storage "symvan_db" as DB_Schema {
+        frame "Tables" {
+            [user]
+            [user_profile]
+            [organization]
+            [member]
+            [event]
+            [enrollment]
+            [task]
+            [audit_log]
+        }
+    }
+}
+
+' ===== EXTERNAL SERVICES =====
+cloud "External Services" {
+    component "OpenAI API\n(Chatbot)" as OpenAI
+    component "Email Service\n(Notifications)" as Email
+    component "SMS Service\n(Notifications)" as SMS
+}
+
+' ===== INFRASTRUCTURE =====
+node "Web Server" as WebServer {
+    component "Apache/XAMPP" as Apache
+    component "PHP Runtime" as PHP
+}
+
+' ===== RELATIONSHIPS =====
+
+User --> Browser : Access via HTTPS
+Admin --> Browser : Access via HTTPS
+
+Browser --> UI : Renders
+UI --> JS : Interacts
+JS --> Frontend : AJAX/POST
+Browser --> Frontend : HTTP Requests
+
+Frontend --> Session : Uses
+Frontend --> Auth : Authenticates
+Frontend --> Nav : Includes
+Frontend --> Footer : Includes
+
+Index --> DB : Queries
+Login --> DB : Validates
+Calendar --> DB : Fetches Events
+Enroll --> DB : Lists Events
+MyEvents --> DB : User Events
+CreateEvent --> DB : Creates Events
+Org --> DB : Manages Orgs
+Planning --> DB : Manages Tasks
+Profile --> DB : Updates Profile
+Chatbot --> OpenAI : AI Queries
+
+API --> DB : CRUD Operations
+EnrollAPI --> DB : Enrollment
+CancelAPI --> DB : Cancel
+EventStatusAPI --> DB : Update
+EventDescAPI --> DB : Update
+TaskAPI --> DB : Update
+DeleteAPI --> DB : Delete
+
+DB --> MySQL : Connects via mysqli
+DB --> [user] : Accesses
+DB --> [user_profile] : Accesses
+DB --> [organization] : Accesses
+DB --> [member] : Accesses
+DB --> [event] : Accesses
+DB --> [enrollment] : Accesses
+DB --> [task] : Accesses
+DB --> [audit_log] : Logs Actions
+
+Frontend --> API : Calls
+WebServer --> Apache : Hosts
+Apache --> PHP : Executes
+PHP --> Frontend : Runs Scripts
+
+Profile --> Email : Sends (if enabled)
+Profile --> SMS : Sends (if enabled)
+
+note right of MySQL
+  Stores all application data
+  8 main tables with relationships
+  Enforces referential integrity
+end note
+
+note right of OpenAI
+  Few-shot learning approach
+  Enhances user experience
+  Chatbot assistance
+end note
+
+note bottom of Frontend
+  PHP-based MVC-like structure
+  Session-based authentication
+  Server-side rendering
+end note
+
+note left of API
+  RESTful-style endpoints
+  Handle CRUD operations
+  Return JSON/Redirects
+end note
+
+@enduml
