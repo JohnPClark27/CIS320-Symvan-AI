@@ -1,0 +1,93 @@
+@startuml Event_Creation_Sequence
+
+title Symvan AI - Event Creation Sequence Diagram
+
+actor "Organization Admin" as Admin
+participant "create_event.php" as CreateEvent
+participant "Session Manager" as Session
+participant "Database\n(MySQL)" as DB
+participant "Audit Log" as Audit
+participant "organization.php" as OrgPage
+
+Admin -> CreateEvent: Access event creation form
+activate CreateEvent
+
+CreateEvent -> Session: Check authentication
+activate Session
+Session --> CreateEvent: User authenticated
+deactivate Session
+
+CreateEvent -> DB: Fetch user's organizations\nWHERE user_id IN member
+activate DB
+DB --> CreateEvent: Return organizations list
+deactivate DB
+
+CreateEvent -> Admin: Display form with\norganization dropdown
+deactivate CreateEvent
+
+Admin -> CreateEvent: Submit event details:\n- name\n- organization_id\n- details\n- date\n- start_time\n- end_time\n- location
+activate CreateEvent
+
+CreateEvent -> CreateEvent: Validate form input
+
+alt Validation fails
+    CreateEvent -> Admin: Display error messages
+else Validation succeeds
+    CreateEvent -> DB: Check if event name\nalready exists
+    activate DB
+    DB --> CreateEvent: Event name availability
+    deactivate DB
+    
+    alt Event name exists
+        CreateEvent -> Admin: Display "Event name\nalready exists"
+    else Event name unique
+        CreateEvent -> DB: INSERT INTO event\n(name, organization_id, details,\ndate, start_time, end_time,\nlocation, status='Draft')
+        activate DB
+        DB --> CreateEvent: Event created\n(return event_id)
+        deactivate DB
+        
+        CreateEvent -> Audit: Log event creation
+        activate Audit
+        Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Created new event',\naffected_id=event_id)
+        DB --> Audit: Log recorded
+        deactivate Audit
+        
+        CreateEvent -> Admin: Display success message\n"Event created as Draft"
+        
+        CreateEvent -> OrgPage: Redirect to organization page
+        activate OrgPage
+        
+        OrgPage -> DB: Fetch organization events\nWHERE organization_id
+        activate DB
+        DB --> OrgPage: Return events list
+        deactivate DB
+        
+        OrgPage -> Admin: Display organization\nevents including new draft
+        deactivate OrgPage
+    end
+end
+
+deactivate CreateEvent
+
+note right of CreateEvent
+  Events are created with
+  status = 'Draft' by default
+  
+  Must be promoted to
+  'Posted' to be visible
+  to all users
+end note
+
+note right of DB
+  Unique constraint on
+  event.name prevents
+  duplicate event names
+end note
+
+note right of Audit
+  Action logged:
+  "Created event '{name}'
+  for organization ID {org_id}"
+end note
+
+@enduml

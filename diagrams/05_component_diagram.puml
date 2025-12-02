@@ -1,0 +1,232 @@
+@startuml Symvan_AI_Component_Diagram
+
+title Symvan AI - Component Diagram
+
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam package {
+    BackgroundColor LightYellow
+    BorderColor Black
+}
+
+' ===== PRESENTATION LAYER =====
+package "Presentation Layer" {
+    [Web Browser] as Browser
+    [HTML/CSS UI] as UI
+    [Client-Side JavaScript] as ClientJS
+    
+    Browser --> UI
+    UI --> ClientJS
+}
+
+' ===== FRONTEND COMPONENTS =====
+package "Frontend Components (PHP)" {
+    
+    package "Page Controllers" {
+        [index.php\nDashboard] as IndexPage
+        [login.php\nAuthentication] as LoginPage
+        [signup.php\nRegistration] as SignupPage
+        [calendar.php\nEvent Calendar] as CalendarPage
+        [enroll.php\nEvent Browse] as EnrollPage
+        [myevents.php\nUser Events] as MyEventsPage
+        [create_event.php\nEvent Creation] as CreateEventPage
+        [organization.php\nOrganizations] as OrgPage
+        [planning.php\nTask Planning] as PlanningPage
+        [profile.php\nUser Profile] as ProfilePage
+        [chatbot.php\nAI Assistant] as ChatbotPage
+        [audit.php\nAudit Viewer] as AuditPage
+    }
+    
+    package "API Controllers" {
+        [enroll.php\nEnrollment API] as EnrollAPI
+        [cancel_enrollment.php\nCancel API] as CancelAPI
+        [update_event_status.php\nEvent Status API] as EventStatusAPI
+        [update_event_description.php\nEvent Desc API] as EventDescAPI
+        [update_task.php\nTask API] as TaskAPI
+        [delete_event.php\nDelete Event API] as DeleteAPI
+        [calendar_event_details.php\nEvent Details API] as EventDetailsAPI
+    }
+    
+    package "Shared Components" {
+        [navbar.php\nNavigation Component] as Navbar
+        [footer.php\nFooter Component] as Footer
+        [db_connect.php\nDatabase Connection] as DBConnect
+        [Session Manager] as SessionMgr
+        [Authentication Service] as AuthService
+    }
+}
+
+' ===== BUSINESS LOGIC =====
+package "Business Logic Layer" {
+    
+    component "User Service" as UserService {
+        port "User Operations" as UserOps
+    }
+    
+    component "Event Service" as EventService {
+        port "Event Operations" as EventOps
+    }
+    
+    component "Organization Service" as OrgService {
+        port "Org Operations" as OrgOps
+    }
+    
+    component "Enrollment Service" as EnrollService {
+        port "Enrollment Operations" as EnrollOps
+    }
+    
+    component "Task Service" as TaskService {
+        port "Task Operations" as TaskOps
+    }
+    
+    component "Audit Service" as AuditService {
+        port "Audit Operations" as AuditOps
+    }
+    
+    component "Notification Service" as NotificationService {
+        port "Notification Operations" as NotifyOps
+    }
+}
+
+' ===== DATA LAYER =====
+package "Data Access Layer" {
+    
+    component "User Repository" as UserRepo {
+        database "user\nuser_profile"
+    }
+    
+    component "Event Repository" as EventRepo {
+        database "event"
+    }
+    
+    component "Organization Repository" as OrgRepo {
+        database "organization\nmember"
+    }
+    
+    component "Enrollment Repository" as EnrollRepo {
+        database "enrollment"
+    }
+    
+    component "Task Repository" as TaskRepo {
+        database "task"
+    }
+    
+    component "Audit Repository" as AuditRepo {
+        database "audit_log"
+    }
+}
+
+' ===== EXTERNAL SERVICES =====
+package "External Services" {
+    [OpenAI API] as OpenAI
+    [Email Service\nSMTP] as EmailService
+    [SMS Gateway] as SMSService
+}
+
+' ===== DATABASE =====
+database "MySQL Database\n(symvan_db)" as MySQL
+
+' ===== RELATIONSHIPS =====
+
+' Browser to Pages
+Browser --> IndexPage
+Browser --> LoginPage
+Browser --> SignupPage
+Browser --> CalendarPage
+Browser --> EnrollPage
+Browser --> MyEventsPage
+Browser --> CreateEventPage
+Browser --> OrgPage
+Browser --> PlanningPage
+Browser --> ProfilePage
+Browser --> ChatbotPage
+Browser --> AuditPage
+
+' Pages use shared components
+IndexPage ..> Navbar : includes
+IndexPage ..> Footer : includes
+CalendarPage ..> Navbar : includes
+EnrollPage ..> Navbar : includes
+
+' Pages to DB Connection
+IndexPage --> DBConnect
+LoginPage --> DBConnect
+CalendarPage --> DBConnect
+EnrollPage --> DBConnect
+MyEventsPage --> DBConnect
+CreateEventPage --> DBConnect
+OrgPage --> DBConnect
+PlanningPage --> DBConnect
+ProfilePage --> DBConnect
+
+' API Endpoints to Services
+EnrollAPI --> EnrollService
+CancelAPI --> EnrollService
+EventStatusAPI --> EventService
+EventDescAPI --> EventService
+TaskAPI --> TaskService
+DeleteAPI --> EventService
+EventDetailsAPI --> EventService
+
+' Pages use Session and Auth
+LoginPage --> SessionMgr
+LoginPage --> AuthService
+IndexPage --> SessionMgr
+CreateEventPage --> AuthService
+
+' Services to Repositories
+UserService --> UserRepo
+EventService --> EventRepo
+OrgService --> OrgRepo
+EnrollService --> EnrollRepo
+TaskService --> TaskRepo
+AuditService --> AuditRepo
+
+' All actions logged
+UserService --> AuditService : logs
+EventService --> AuditService : logs
+EnrollService --> AuditService : logs
+TaskService --> AuditService : logs
+OrgService --> AuditService : logs
+
+' Repositories to Database
+UserRepo --> MySQL
+EventRepo --> MySQL
+OrgRepo --> MySQL
+EnrollRepo --> MySQL
+TaskRepo --> MySQL
+AuditRepo --> MySQL
+
+' External Services
+ChatbotPage --> OpenAI
+NotificationService --> EmailService
+NotificationService --> SMSService
+ProfilePage --> NotificationService
+
+note right of DBConnect
+  Centralized database
+  connection management
+  using mysqli
+end note
+
+note right of SessionMgr
+  PHP session-based
+  user authentication
+  and authorization
+end note
+
+note bottom of AuditService
+  Logs all user actions
+  for compliance tracking
+  and security auditing
+end note
+
+note left of OpenAI
+  Few-shot learning
+  for enhanced UX
+end note
+
+@enduml

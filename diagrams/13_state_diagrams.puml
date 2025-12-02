@@ -1,0 +1,256 @@
+@startuml State_Diagrams
+
+title Symvan AI - State Diagrams
+
+skinparam state {
+    BackgroundColor LightYellow
+    BorderColor Black
+    ArrowColor Blue
+}
+
+' ===== EVENT STATE DIAGRAM =====
+
+state "Event Lifecycle" as EventLifecycle {
+    
+    [*] --> Draft : Organization admin\ncreates event
+    
+    state Draft {
+        Draft : **Properties:**
+        Draft : - Visible to org members only
+        Draft : - Can be edited
+        Draft : - No enrollments allowed
+        Draft : - status = 'Draft'
+    }
+    
+    state Posted {
+        Posted : **Properties:**
+        Posted : - Visible to all users
+        Posted : - Enrollments allowed
+        Posted : - Limited editing
+        Posted : - status = 'Posted'
+        Posted : - Attendee count tracked
+    }
+    
+    state Deleted {
+        Deleted : **Properties:**
+        Deleted : - Event removed from DB
+        Deleted : - All enrollments deleted
+        Deleted : - Related tasks orphaned
+        Deleted : - Action logged
+    }
+    
+    Draft --> Posted : Admin updates status\nto 'Posted'\n[Event details complete]
+    Posted --> Draft : Admin reverts\nto draft\n[Need modifications]
+    
+    Draft --> Deleted : Admin deletes event\n[Event cancelled]
+    Posted --> Deleted : Admin deletes event\n[Event cancelled]
+    
+    Posted --> [*] : Event date passed\n[Event completed]
+    
+    note right of Draft
+        Event creation always
+        starts in Draft state
+        
+        Logged action:
+        "Created new event"
+    end note
+    
+    note right of Posted
+        State change triggers:
+        - Notification to followers
+        - Audit log entry
+        - Email alerts (if enabled)
+        
+        Logged action:
+        "Updated event status
+        to 'Posted'"
+    end note
+}
+
+' ===== TASK STATE DIAGRAM =====
+
+state "Task Lifecycle" as TaskLifecycle {
+    
+    [*] --> ToDo : User creates task
+    
+    state ToDo {
+        ToDo : **Properties:**
+        ToDo : - Initial state
+        ToDo : - status = 'To Do'
+        ToDo : - Awaiting action
+        ToDo : - Can be edited
+    }
+    
+    state InProgress {
+        InProgress : **Properties:**
+        InProgress : - status = 'In Progress'
+        InProgress : - Work started
+        InProgress : - Can still be edited
+    }
+    
+    state Completed {
+        Completed : **Properties:**
+        Completed : - status = 'Completed'
+        Completed : - Task finished
+        Completed : - Can be reopened
+    }
+    
+    state Deleted {
+        Deleted : **Properties:**
+        Deleted : - Task removed from DB
+        Deleted : - Cannot be recovered
+        Deleted : - Action logged
+    }
+    
+    ToDo --> InProgress : User starts work\n[Status update]
+    InProgress --> Completed : Work finished\n[Mark complete]
+    
+    InProgress --> ToDo : Reopen task\n[Need to restart]
+    Completed --> InProgress : Reopen task\n[Additional work needed]
+    Completed --> ToDo : Reset task\n[Start over]
+    
+    ToDo --> Deleted : User deletes\n[Task no longer needed]
+    InProgress --> Deleted : User deletes\n[Task cancelled]
+    Completed --> Deleted : User deletes\n[Cleanup]
+    
+    note right of ToDo
+        Default state for
+        new tasks
+        
+        Logged action:
+        "Added new task"
+    end note
+    
+    note bottom of InProgress
+        Status updates logged:
+        "Updated task status
+        for task ID {id}
+        to In Progress"
+    end note
+    
+    note bottom of Completed
+        Completed tasks remain
+        visible for reference
+        
+        Can be reopened if
+        additional work needed
+    end note
+}
+
+' ===== USER SESSION STATE DIAGRAM =====
+
+state "User Session Lifecycle" as SessionLifecycle {
+    
+    [*] --> LoggedOut : Initial state
+    
+    state LoggedOut {
+        LoggedOut : **Properties:**
+        LoggedOut : - No session exists
+        LoggedOut : - Access restricted
+        LoggedOut : - Redirected to login
+    }
+    
+    state LoggedIn {
+        LoggedIn : **Properties:**
+        LoggedIn : - Session active
+        LoggedIn : - $_SESSION variables set
+        LoggedIn : - Full system access
+        LoggedIn : - Activity tracked
+        
+        state Active {
+            Active : User interacting
+            Active : with system
+        }
+        
+        state Idle {
+            Idle : No recent activity
+            Idle : Session still valid
+        }
+        
+        [*] --> Active
+        Active --> Idle : No activity\nfor period
+        Idle --> Active : User action
+    }
+    
+    LoggedOut --> LoggedIn : Login successful\n[Valid credentials]\n[Log action]
+    
+    LoggedIn --> LoggedOut : User logout\n[Explicit action]\n[Destroy session]
+    LoggedIn --> LoggedOut : Session timeout\n[Inactive too long]
+    LoggedIn --> LoggedOut : Security event\n[Password change]\n[Force logout]
+    
+    note right of LoggedIn
+        Session variables:
+        - user_id
+        - username
+        - email
+        - level
+        
+        All actions logged
+        to audit_log
+    end note
+    
+    note left of LoggedOut
+        Restricted access:
+        - Only login/signup
+        - Public event view
+          (not available currently)
+    end note
+}
+
+' ===== ENROLLMENT STATE DIAGRAM =====
+
+state "Enrollment Lifecycle" as EnrollmentLifecycle {
+    
+    [*] --> NotEnrolled : User browses events
+    
+    state NotEnrolled {
+        NotEnrolled : **Properties:**
+        NotEnrolled : - No enrollment record
+        NotEnrolled : - "Enroll" button shown
+        NotEnrolled : - Can enroll if event Posted
+    }
+    
+    state Enrolled {
+        Enrolled : **Properties:**
+        Enrolled : - Enrollment record exists
+        Enrolled : - "Enrolled" status shown
+        Enrolled : - Event in "My Events"
+        Enrolled : - Attendee count incremented
+        Enrolled : - Can cancel enrollment
+    }
+    
+    state Cancelled {
+        Cancelled : **Properties:**
+        Cancelled : - Enrollment record deleted
+        Cancelled : - Attendee count decremented
+        Cancelled : - Action logged
+    }
+    
+    NotEnrolled --> Enrolled : User enrolls\n[Event is Posted]\n[Create enrollment]\n[Log action]
+    
+    Enrolled --> Cancelled : User cancels\n[Cancel enrollment]\n[Delete record]\n[Update count]\n[Log action]
+    
+    Cancelled --> NotEnrolled : Can re-enroll
+    
+    Enrolled --> [*] : Event completed\n[Date passed]
+    
+    note right of Enrolled
+        Unique constraint ensures
+        one enrollment per user
+        per event
+        
+        Logged actions:
+        "Enrolled in event ID {id}"
+    end note
+    
+    note bottom of Cancelled
+        Cancellation logged:
+        "Unenrolled from
+        event ID {id}"
+        
+        Can re-enroll after
+        cancellation
+    end note
+}
+
+@enduml

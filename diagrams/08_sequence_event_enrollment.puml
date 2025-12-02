@@ -1,0 +1,99 @@
+@startuml Event_Enrollment_Sequence
+
+title Symvan AI - Event Enrollment Sequence Diagram
+
+actor Student
+participant "enroll.php\n(Browse Page)" as Enroll
+participant "Session Manager" as Session
+participant "Database\n(MySQL)" as DB
+participant "Audit Log" as Audit
+participant "myevents.php" as MyEvents
+
+Student -> Enroll: Browse posted events
+activate Enroll
+
+Enroll -> Session: Check authentication
+activate Session
+Session --> Enroll: User authenticated\n(get user_id)
+deactivate Session
+
+Enroll -> DB: Query posted events:\nSELECT * FROM event\nWHERE status='Posted'\nAND date >= CURDATE()
+activate DB
+DB --> Enroll: Return events list\nwith organization info
+deactivate DB
+
+Enroll -> DB: For each event,\ncheck if user enrolled:\nSELECT * FROM enrollment\nWHERE user_id AND event_id
+activate DB
+DB --> Enroll: Return enrollment status
+deactivate DB
+
+Enroll -> Student: Display events with\n"Enroll" or "Enrolled" buttons
+deactivate Enroll
+
+Student -> Enroll: Click "Enroll" on event
+activate Enroll
+
+Enroll -> DB: Check if already enrolled:\nSELECT * FROM enrollment\nWHERE user_id AND event_id
+activate DB
+DB --> Enroll: Enrollment status
+deactivate DB
+
+alt Already enrolled
+    Enroll -> Student: Display "Already enrolled"
+else Not enrolled
+    Enroll -> DB: INSERT INTO enrollment\n(user_id, event_id,\nenrolled_at=NOW())
+    activate DB
+    DB --> Enroll: Enrollment created\n(return enrollment_id)
+    deactivate DB
+    
+    Enroll -> DB: Update event attendees count:\nUPDATE event\nSET attendees = attendees + 1\nWHERE id = event_id
+    activate DB
+    DB --> Enroll: Attendees count updated
+    deactivate DB
+    
+    Enroll -> Audit: Log enrollment action
+    activate Audit
+    Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Enrolled in event ID',\naffected_id=event_id)
+    DB --> Audit: Log recorded
+    deactivate Audit
+    
+    Enroll -> Student: Display success message\n"Successfully enrolled!"
+    
+    alt User wants to view enrollments
+        Student -> MyEvents: Navigate to My Events
+        activate MyEvents
+        
+        MyEvents -> DB: Query user's enrollments:\nSELECT e.* FROM event e\nJOIN enrollment en\nON e.id = en.event_id\nWHERE en.user_id
+        activate DB
+        DB --> MyEvents: Return enrolled events
+        deactivate DB
+        
+        MyEvents -> Student: Display enrolled events\nwith "Cancel" option
+        deactivate MyEvents
+    end
+end
+
+deactivate Enroll
+
+note right of DB
+  Unique constraint on
+  (user_id, event_id)
+  prevents duplicate enrollments
+end note
+
+note right of Audit
+  Action logged:
+  "Enrolled in event ID {event_id}"
+  or
+  "Unenrolled from event ID {event_id}"
+end note
+
+note left of Enroll
+  Only "Posted" events
+  can be enrolled in
+  
+  Draft events are not
+  visible on browse page
+end note
+
+@enduml

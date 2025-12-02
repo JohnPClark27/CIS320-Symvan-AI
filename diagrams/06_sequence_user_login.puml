@@ -1,0 +1,69 @@
+@startuml User_Login_Sequence
+
+title Symvan AI - User Login Sequence Diagram
+
+actor User
+participant "login.php" as Login
+participant "Session Manager" as Session
+participant "Database\n(MySQL)" as DB
+participant "Audit Log" as Audit
+participant "index.php\n(Dashboard)" as Dashboard
+
+User -> Login: Enter credentials\n(username, password)
+activate Login
+
+Login -> Login: Validate input
+alt Input validation fails
+    Login -> User: Display error message
+else Input valid
+    Login -> DB: Query user by username
+    activate DB
+    DB --> Login: Return user record\n(password_hash)
+    deactivate DB
+    
+    Login -> Login: Verify password\nusing password_verify()
+    
+    alt Password incorrect
+        Login -> User: Display "Invalid credentials"
+    else Password correct
+        Login -> Session: Create session
+        activate Session
+        Session -> Session: Set session variables:\n- user_id\n- username\n- email\n- level
+        Session --> Login: Session created
+        deactivate Session
+        
+        Login -> Audit: Log login action
+        activate Audit
+        Audit -> DB: INSERT INTO audit_log\n(user_id, action_description)
+        DB --> Audit: Log recorded
+        deactivate Audit
+        
+        Login -> Dashboard: Redirect to dashboard
+        activate Dashboard
+        Dashboard -> Session: Verify session
+        Session --> Dashboard: Session valid
+        
+        Dashboard -> DB: Fetch user statistics\n- Enrolled events\n- Upcoming events\n- Total events
+        DB --> Dashboard: Return statistics
+        
+        Dashboard -> User: Display dashboard
+        deactivate Dashboard
+    end
+end
+
+deactivate Login
+
+note right of Session
+  PHP Session variables:
+  - $_SESSION['user_id']
+  - $_SESSION['username']
+  - $_SESSION['email']
+  - $_SESSION['level']
+end note
+
+note right of Audit
+  Every login is logged
+  for security tracking
+end note
+
+@enduml

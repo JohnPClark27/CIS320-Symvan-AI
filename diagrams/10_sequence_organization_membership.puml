@@ -1,0 +1,179 @@
+@startuml Organization_Membership_Sequence
+
+title Symvan AI - Organization Membership Sequence Diagram
+
+actor Student
+participant "organization.php" as OrgPage
+participant "Session Manager" as Session
+participant "Database\n(MySQL)" as DB
+participant "Audit Log" as Audit
+
+== View Organizations ==
+
+Student -> OrgPage: Access organizations page
+activate OrgPage
+
+OrgPage -> Session: Check authentication
+activate Session
+Session --> OrgPage: User authenticated\n(get user_id)
+deactivate Session
+
+OrgPage -> DB: Query all organizations:\nSELECT * FROM organization
+activate DB
+DB --> OrgPage: Return organizations list
+deactivate DB
+
+OrgPage -> DB: Check user's memberships:\nSELECT * FROM member\nWHERE user_id
+activate DB
+DB --> OrgPage: Return user's memberships
+deactivate DB
+
+OrgPage -> Student: Display organizations\nwith "Join" or "Member" status
+deactivate OrgPage
+
+== Join Organization ==
+
+Student -> OrgPage: Click "Join Organization"
+activate OrgPage
+
+OrgPage -> Student: Prompt for organization password
+deactivate OrgPage
+
+Student -> OrgPage: Enter password and\nselect role (Member/Admin)
+activate OrgPage
+
+OrgPage -> DB: Query organization:\nSELECT * FROM organization\nWHERE id=org_id
+activate DB
+DB --> OrgPage: Return organization details\nincluding password
+deactivate DB
+
+OrgPage -> OrgPage: Verify password
+
+alt Password incorrect
+    OrgPage -> Student: Display error\n"Invalid password"
+else Password correct
+    OrgPage -> DB: Check if already member:\nSELECT * FROM member\nWHERE user_id AND organization_id
+    activate DB
+    DB --> OrgPage: Membership status
+    deactivate DB
+    
+    alt Already a member
+        OrgPage -> Student: Display "Already a member"
+    else Not a member
+        OrgPage -> DB: INSERT INTO member\n(user_id, organization_id,\npermission_level)
+        activate DB
+        DB --> OrgPage: Membership created\n(return member_id)
+        deactivate DB
+        
+        OrgPage -> Audit: Log membership
+        activate Audit
+        Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Joined organization\nas {role}',\naffected_id=org_id)
+        DB --> Audit: Log recorded
+        deactivate Audit
+        
+        OrgPage -> Student: Display success\n"Joined organization!"
+    end
+end
+
+deactivate OrgPage
+
+== View Organization Details ==
+
+Student -> OrgPage: Click on organization name
+activate OrgPage
+
+OrgPage -> DB: Query organization details:\nSELECT * FROM organization\nWHERE id=org_id
+activate DB
+DB --> OrgPage: Return organization info
+deactivate DB
+
+OrgPage -> DB: Query organization members:\nSELECT u.username, m.permission_level\nFROM member m\nJOIN user u ON m.user_id=u.id\nWHERE m.organization_id=org_id
+activate DB
+DB --> OrgPage: Return members list
+deactivate DB
+
+OrgPage -> DB: Query organization events:\nSELECT * FROM event\nWHERE organization_id=org_id
+activate DB
+DB --> OrgPage: Return events list
+deactivate DB
+
+OrgPage -> Student: Display organization details:\n- Description\n- Members\n- Events\n- Management options (if admin)
+deactivate OrgPage
+
+== Leave Organization ==
+
+Student -> OrgPage: Click "Leave Organization"
+activate OrgPage
+
+OrgPage -> DB: DELETE FROM member\nWHERE user_id AND organization_id
+activate DB
+DB --> OrgPage: Membership removed
+deactivate DB
+
+OrgPage -> Audit: Log action
+activate Audit
+Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Left organization',\naffected_id=org_id)
+DB --> Audit: Log recorded
+deactivate Audit
+
+OrgPage -> Student: Display "Left organization"
+deactivate OrgPage
+
+== Manage Members (Admin Only) ==
+
+Student -> OrgPage: Access member management
+activate OrgPage
+
+OrgPage -> DB: Check user permission:\nSELECT permission_level\nFROM member\nWHERE user_id AND organization_id
+activate DB
+DB --> OrgPage: Return permission level
+deactivate DB
+
+alt User is not Admin
+    OrgPage -> Student: Display error\n"Unauthorized access"
+else User is Admin
+    OrgPage -> Student: Display member list\nwith edit options
+    
+    Student -> OrgPage: Update member permission
+    
+    OrgPage -> DB: UPDATE member\nSET permission_level=new_level\nWHERE id=member_id\nAND organization_id=org_id
+    activate DB
+    DB --> OrgPage: Permission updated
+    deactivate DB
+    
+    OrgPage -> Audit: Log permission change
+    activate Audit
+    Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Updated member\npermission',\naffected_id=member_id)
+    DB --> Audit: Log recorded
+    deactivate Audit
+    
+    OrgPage -> Student: Display success
+end
+
+deactivate OrgPage
+
+note right of OrgPage
+  Organization features:
+  - Password-protected joining
+  - Two permission levels:
+    * Member (view only)
+    * Admin (full access)
+end note
+
+note right of DB
+  Unique constraint on
+  (user_id, organization_id)
+  prevents duplicate memberships
+  
+  ON DELETE CASCADE ensures
+  cleanup when org is deleted
+end note
+
+note left of Audit
+  Actions logged:
+  - Join organization
+  - Leave organization
+  - Permission changes
+end note
+
+@enduml

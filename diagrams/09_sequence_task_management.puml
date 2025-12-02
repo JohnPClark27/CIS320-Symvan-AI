@@ -1,0 +1,138 @@
+@startuml Task_Management_Sequence
+
+title Symvan AI - Task Management Sequence Diagram
+
+actor "Organization Admin" as Admin
+participant "planning.php" as Planning
+participant "update_task.php" as UpdateTask
+participant "Session Manager" as Session
+participant "Database\n(MySQL)" as DB
+participant "Audit Log" as Audit
+
+Admin -> Planning: Access planning page
+activate Planning
+
+Planning -> Session: Check authentication
+activate Session
+Session --> Planning: User authenticated\n(get user_id)
+deactivate Session
+
+Planning -> DB: Fetch user's organizations\nand events
+activate DB
+DB --> Planning: Return organizations\nand events list
+deactivate DB
+
+Planning -> DB: Fetch existing tasks:\nSELECT * FROM task\nWHERE created_by=user_id\nOR event_id IN (user's events)
+activate DB
+DB --> Planning: Return tasks list
+deactivate DB
+
+Planning -> Admin: Display tasks grouped by event\nwith status indicators
+deactivate Planning
+
+== Task Creation ==
+
+Admin -> Planning: Create new task:\n- title\n- description\n- event_id (optional)
+activate Planning
+
+Planning -> Planning: Validate input
+
+Planning -> DB: INSERT INTO task\n(title, description,\nstatus='To Do',\ncreated_by=user_id,\nevent_id, created_at=NOW())
+activate DB
+DB --> Planning: Task created\n(return task_id)
+deactivate DB
+
+Planning -> Audit: Log task creation
+activate Audit
+Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Added new task',\naffected_id=task_id)
+DB --> Audit: Log recorded
+deactivate Audit
+
+Planning -> Admin: Display success\nand refresh task list
+deactivate Planning
+
+== Task Status Update ==
+
+Admin -> Planning: Change task status:\n- To Do → In Progress\n- In Progress → Completed
+activate Planning
+
+Planning -> UpdateTask: POST request with\ntask_id and new status
+activate UpdateTask
+
+UpdateTask -> Session: Verify authentication
+activate Session
+Session --> UpdateTask: User authenticated
+deactivate Session
+
+UpdateTask -> DB: Verify task ownership:\nSELECT * FROM task\nWHERE id=task_id\nAND created_by=user_id
+activate DB
+DB --> UpdateTask: Task details
+deactivate DB
+
+alt User owns task or is admin
+    UpdateTask -> DB: UPDATE task\nSET status=new_status\nWHERE id=task_id
+    activate DB
+    DB --> UpdateTask: Task updated
+    deactivate DB
+    
+    UpdateTask -> Audit: Log status change
+    activate Audit
+    Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Updated task status',\naffected_id=task_id)
+    DB --> Audit: Log recorded
+    deactivate Audit
+    
+    UpdateTask -> Planning: Return success
+    Planning -> Admin: Display updated task\nwith new status
+else User doesn't own task
+    UpdateTask -> Admin: Display error\n"Unauthorized"
+end
+
+deactivate UpdateTask
+deactivate Planning
+
+== Task Deletion ==
+
+Admin -> Planning: Delete task
+activate Planning
+
+Planning -> DB: Verify ownership
+activate DB
+DB --> Planning: Ownership confirmed
+deactivate DB
+
+Planning -> DB: DELETE FROM task\nWHERE id=task_id\nAND created_by=user_id
+activate DB
+DB --> Planning: Task deleted
+deactivate DB
+
+Planning -> Audit: Log deletion
+activate Audit
+Audit -> DB: INSERT INTO audit_log\n(user_id,\naction='Deleted task',\naffected_id=task_id)
+DB --> Audit: Log recorded
+deactivate Audit
+
+Planning -> Admin: Refresh task list
+deactivate Planning
+
+note right of Planning
+  Tasks can be linked to:
+  - Specific events (event_id)
+  - Organizations (organization_id)
+  - Personal (both NULL)
+end note
+
+note right of DB
+  Task status enum:
+  - To Do
+  - In Progress
+  - Completed
+end note
+
+note left of Audit
+  All task operations logged:
+  - Creation
+  - Status updates
+  - Deletion
+end note
+
+@enduml

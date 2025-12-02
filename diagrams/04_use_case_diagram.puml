@@ -1,0 +1,201 @@
+@startuml Symvan_AI_Use_Case
+
+title Symvan AI - Use Case Diagram
+
+left to right direction
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+' ===== ACTORS =====
+actor "Student" as Student
+actor "Faculty" as Faculty
+actor "Organization Admin" as OrgAdmin
+actor "System Admin" as SysAdmin
+actor "AI Chatbot" as AI
+
+' Define inheritance
+Faculty -up-|> Student
+OrgAdmin -up-|> Student
+SysAdmin -up-|> OrgAdmin
+
+' ===== SYSTEM BOUNDARY =====
+rectangle "Symvan AI Event Management System" {
+    
+    ' === AUTHENTICATION ===
+    package "Authentication & Authorization" {
+        usecase "Register Account" as UC1
+        usecase "Login" as UC2
+        usecase "Logout" as UC3
+        usecase "Update Password" as UC4
+    }
+    
+    ' === USER PROFILE ===
+    package "User Profile Management" {
+        usecase "View Profile" as UC5
+        usecase "Update Profile" as UC6
+        usecase "Set Notification Preferences" as UC7
+    }
+    
+    ' === EVENT BROWSING ===
+    package "Event Discovery & Enrollment" {
+        usecase "Browse Events" as UC8
+        usecase "View Event Details" as UC9
+        usecase "View Calendar" as UC10
+        usecase "Search Events" as UC11
+        usecase "Enroll in Event" as UC12
+        usecase "Cancel Enrollment" as UC13
+        usecase "View My Events" as UC14
+    }
+    
+    ' === EVENT MANAGEMENT ===
+    package "Event Management" {
+        usecase "Create Event Draft" as UC15
+        usecase "Edit Event" as UC16
+        usecase "Delete Event" as UC17
+        usecase "Update Event Status" as UC18
+        usecase "Update Event Description" as UC19
+        usecase "View Event Attendees" as UC20
+    }
+    
+    ' === ORGANIZATION ===
+    package "Organization Management" {
+        usecase "View Organizations" as UC21
+        usecase "Join Organization" as UC22
+        usecase "Leave Organization" as UC23
+        usecase "Manage Members" as UC24
+        usecase "Set Member Permissions" as UC25
+        usecase "View Organization Events" as UC26
+    }
+    
+    ' === PLANNING ===
+    package "Task Planning" {
+        usecase "Create Task" as UC27
+        usecase "View Tasks" as UC28
+        usecase "Update Task Status" as UC29
+        usecase "Delete Task" as UC30
+        usecase "Assign Task to Event" as UC31
+    }
+    
+    ' === DASHBOARD ===
+    package "Dashboard & Analytics" {
+        usecase "View Dashboard" as UC32
+        usecase "View Statistics" as UC33
+        usecase "View Upcoming Events" as UC34
+    }
+    
+    ' === AI ASSISTANCE ===
+    package "AI-Powered Features" {
+        usecase "Chat with AI Assistant" as UC35
+        usecase "Get Event Recommendations" as UC36
+    }
+    
+    ' === AUDIT ===
+    package "Audit & Logging" {
+        usecase "View Audit Logs" as UC37
+        usecase "Log User Actions" as UC38
+    }
+    
+    ' === NOTIFICATIONS ===
+    package "Notification System" {
+        usecase "Send Email Notifications" as UC39
+        usecase "Send SMS Notifications" as UC40
+        usecase "Send Weekly Digest" as UC41
+    }
+}
+
+' ===== RELATIONSHIPS =====
+
+' Authentication
+Student --> UC1
+Student --> UC2
+Student --> UC3
+Student --> UC4
+
+' Profile
+Student --> UC5
+Student --> UC6
+Student --> UC7
+
+' Event Discovery
+Student --> UC8
+Student --> UC9
+Student --> UC10
+Student --> UC11
+Student --> UC12
+Student --> UC13
+Student --> UC14
+
+' Event Management (Organization Admins)
+OrgAdmin --> UC15
+OrgAdmin --> UC16
+OrgAdmin --> UC17
+OrgAdmin --> UC18
+OrgAdmin --> UC19
+OrgAdmin --> UC20
+
+' Organization
+Student --> UC21
+Student --> UC22
+Student --> UC23
+OrgAdmin --> UC24
+OrgAdmin --> UC25
+OrgAdmin --> UC26
+
+' Planning
+OrgAdmin --> UC27
+OrgAdmin --> UC28
+OrgAdmin --> UC29
+OrgAdmin --> UC30
+OrgAdmin --> UC31
+
+' Dashboard
+Student --> UC32
+Student --> UC33
+Student --> UC34
+
+' AI Features
+Student --> UC35
+AI --> UC36
+
+' Audit
+SysAdmin --> UC37
+UC38 ..> UC2 : <<include>>
+UC38 ..> UC12 : <<include>>
+UC38 ..> UC15 : <<include>>
+UC38 ..> UC27 : <<include>>
+UC38 ..> UC6 : <<include>>
+
+' Notifications
+UC39 ..> UC12 : <<extend>>
+UC40 ..> UC12 : <<extend>>
+UC41 ..> UC7 : <<extend>>
+
+' Event Creation Dependencies
+UC15 ..> UC2 : <<include>>
+UC12 ..> UC8 : <<extend>>
+UC18 ..> UC16 : <<extend>>
+
+note right of UC38
+  All user actions are
+  automatically logged
+  to the audit_log table
+end note
+
+note right of UC15
+  Events start as "Draft"
+  and can be promoted
+  to "Posted" status
+end note
+
+note right of UC12
+  Users can only enroll
+  in Posted events
+end note
+
+note bottom of UC35
+  Powered by OpenAI
+  Uses few-shot learning
+end note
+
+@enduml
